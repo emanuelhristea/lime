@@ -74,7 +74,7 @@ func (s *Subscription) UpdateSubscription(uid uint32) (*Subscription, error) {
 }
 
 // DeleteSubscription is a ...
-func (s *Subscription) DeleteSubscription(uid uint32) (int64, error) {
+func DeleteSubscription(uid uint32) (int64, error) {
 	db := config.DB.Model(&Subscription{}).Where("id = ?", uid).Take(&Subscription{}).Delete(&Subscription{})
 	if db.Error != nil {
 		return 0, db.Error

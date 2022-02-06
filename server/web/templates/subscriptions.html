@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.css">
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="icon" href="../assets/images/icon.svg">
+    <link rel="icon" href="/assets/images/icon.svg">
 </head>
 
 <body>
@@ -24,36 +24,54 @@
                     <tr>
                         <th>Tariff</th>
                         <th></th>
-                        <th>Created</th>
-                        <th>Update</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                        <th>Actions</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td colspan="6" class="td-new-license"><a href="/admin/subscriptions/new">Add new subscription</a></td>
+                    </tr>
                     {{ range $key, $value := .Subscriptions }}
                     <tr>
                         <td><b>{{$value.TariffName}}</b></td>
                         <td>{{$value.StripeID}}</td>
                         <td>{{$value.CreatedAt | formatAsDate}}</td>
                         <td>{{$value.UpdatedAt | formatAsDate}}</td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            <a id="enable_subscription_{{$value.ID}}" href="#" title="Enable subscription {{$value.StripeID}}">&#10004;</a>
+                            <a style="padding-left:5px; padding-right:5px" id="disable_subscription_{{$value.ID}}" href="#" title="Disable subscription {{$value.StripeID}}">&#10006;</a>
+                            <a id="delete_subscription_{{$value.ID}}" href="#" title="Delete {{$value.StripeID}}"><b>&#x1F5D1;</b></a>
+                        </td>
                         <td>{{ $value.Status | columnStatus}}</td>
                     </tr>
                     {{end}}
 
-                    <tr>
-                        <td class="td-noline"></td>
-                        <td colspan="4" class="td-new-license"><a href="/admin/subscription/{{.customerID}}/new">create new license</a></td>
-                    </tr>
-                    {{ if .Licenses }}
-                    {{ range $key, $value := .Licenses }}
-                    <tr>
-                        <td class="td-noline"></td>
-                        <td class="td-license td-license-hash"><a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a></td>
-                        <td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
-                        <td class="td-license">{{$value.UpdatedAt | formatAsDate}}</td>
-                        <td class="td-license">{{$value.Status | columnStatus}}</td>
-                    </tr>
-                    {{end}}
+                    {{ $length := len .Subscriptions }}
+                    {{ if gt $length 0 }}
+                        <tr>
+                            <td class="td-noline"></td>
+                            <td colspan="5" class="td-new-license"><a href="/admin/subscription/{{.customerID}}/new">create new license</a></td>
+                        </tr>
+                    {{ end }}
+
+                    {{if .Licenses}}
+                        {{ range $key, $value := .Licenses }}
+                        <tr>
+                            <td class="td-noline"></td>
+                            <td class="td-license td-license-hash"><a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a></td>
+                            <td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
+                            <td class="td-license">{{$value.UpdatedAt | formatAsDate}}</td>
+                            <td class="td-license" style="text-align: center; vertical-align: middle;">
+                                <a id="enable_license_{{$value.ID}}" href="#" title="Enable license {{$value.Hash}}">&#10004;</a>
+                                <a style="padding-left:5px; padding-right:5px" id="disable_license_{{$value.ID}}" href="#" title="Disable license {{$value.Hash}}">&#10006;</a>
+                                <a id="delete_license_{{$value.ID}}" href="#" title="Delete {{$value.Hash}}"><b>&#x1F5D1;</b></a>
+                            </td>
+                            <td class="td-license">{{$value.Status | columnStatus}}</td>
+                        </tr>
+                        {{end}}
                     {{end}}
 
                 </tbody>
@@ -62,7 +80,8 @@
     </main>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js"></script>
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/main.js"  async defer></script>
+    <script src="/assets/js/subscriptions.js"  async defer></script>
 </body>
 
 </html>

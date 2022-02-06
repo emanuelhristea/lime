@@ -35,7 +35,7 @@
   background: #f4f5f6;
   border-bottom: 0.1rem solid #d1d1d1;
   display: block;
-  height: 5.2rem;
+  height: 5.5rem;
   left: 0;
   max-width: 100%;
   position: fixed;
@@ -85,7 +85,7 @@
 .navigation .title {
   display: inline;
   font-size: 1.6rem;
-  line-height: 5.2rem;
+  line-height: 5.5rem;
   padding: 0;
   text-decoration: none;
 }

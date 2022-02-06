@@ -64,11 +64,11 @@ var subscription = []models.Subscription{
 
 // Load import test data to database
 func Load(db *gorm.DB) {
-	err := db.DropTableIfExists(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
-	if err != nil {
-		log.Fatalf("cannot drop table: %v", err)
-	}
-	err = db.AutoMigrate(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
+	// err := db.DropTableIfExists(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
+	// if err != nil {
+	// 	log.Fatalf("cannot drop table: %v", err)
+	// }
+	err := db.AutoMigrate(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
 
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v", err)

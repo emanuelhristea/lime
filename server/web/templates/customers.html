@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="icon" href="../assets/images/icon.svg">
+    <link rel="icon" href="/assets/images/icon.svg">
 </head>
 
 <body>
@@ -18,13 +18,16 @@
         {{template "_header.html"}}
         <section class="container">
             <h3>{{ .title }}</h3>
+            <div id="customers_result"></div>
             <table>
                 <thead>
                     <tr>
                         <th></th>
                         <th>Name</th>
-                        <th>Created</th>
-                        <th>Updated</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                        <th>Actions</th>
+                        <th></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -35,9 +38,19 @@
                         <td><a href="/admin/subscription/{{$value.ID}}/">{{$value.Name}}</a></td>
                         <td>{{$value.CreatedAt | formatAsDate}}</td>
                         <td>{{$value.UpdatedAt | formatAsDate}}</td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            <a id="enable_customer_{{$value.ID}}" href="#" title="Enable subscription {{$value.Name}}">&#10004;</a>
+                            <a style="padding-left:5px; padding-right:5px" id="disable_customer_{{$value.ID}}" href="#" title="Disable subscription {{$value.Name}}">&#10006;</a>
+                            <a id="delete_customer_{{$value.ID}}" href="#" title="Delete {{$value.Name}}"><b>&#x1F5D1;</b></a>
+                        </td>
                         <td>{{ $value.Status | columnStatus}}</td>
                     </tr>
                     {{end}}
+
+                    <tr>
+                        <td class="td-noline"></td>
+                        <td colspan="5" class="td-new-license"><a href="/admin/customers/new">Add new customer</a></td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -45,7 +58,8 @@
 
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/main.js" async defer></script>
+    <script src="/assets/js/customers.js" async defer></script>
 </body>
 
 </html>

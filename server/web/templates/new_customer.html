@@ -1,4 +1,4 @@
-{{define "login.html"}}
+{{define "new_customer.html"}}
 <!doctype html>
 <html lang="en">
 
@@ -15,19 +15,24 @@
 
 <body>
     <main class="wrapper">
-
+        {{template "_header.html"}}
         <section class="login">
-            <h3 class="title">Authorization</h3>
-            <div id="result_form"></div>
-            <form method="post" id="ajax_form" action="">
-                <input type="text" placeholder="Username" name="username">
-                <input type="password" placeholder="Password" name="password">
-                <input class="button-primary" type="submit" id="auth" value="Send">
+            <h3 class="title">{{.title}}</h3>
+            <div id="customer_result"></div>
+            <form method="post" id="customer_form" action="">
+                <input type="text" placeholder="Name" name="name">
+                <label>
+                    <input type="checkbox" placeholder="Status" name="status">
+                    Active
+                </label>              
+                <input class="button-primary" type="submit" id="create_customer" value="Submit">
+                <input class="button" type="button" id="cancel_customer" onclick="window.location.replace('/admin/customers/')" value="Cancel" />
             </form>
         </section>
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/assets/js/main.js" async defer></script>
+    <script src="/assets/js/main.js"  async defer></script>
+    <script src="/assets/js/customers.js"  async defer></script>
 </body>
 
 </html>

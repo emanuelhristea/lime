@@ -16,7 +16,6 @@ var serverCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(banner)
-		fmt.Println(args)
 		server.Start(args)
 	},
 }

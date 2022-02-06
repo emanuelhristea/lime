@@ -36,6 +36,8 @@ func setupRouter() *gin.Engine {
 	r.Use(sessions.Sessions(config.Config().GetString("cookie_name"), sessions.NewCookieStore([]byte(config.Config().GetString("cookie_secret")))))
 	r.Static("/assets", "./server/web/assets")
 	r.SetFuncMap(template.FuncMap{
+		"formatAsPrice": formatAsPrice,
+		"formatAsCheck": formatAsCheck,
 		"formatAsDate":  formatAsDate,
 		"columnStatus":  columnStatus,
 		"bytesToString": keyBytesToString,
@@ -46,10 +48,22 @@ func setupRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	api.POST("/key", controllers.CreateKey)
-	api.POST("/tariff", controllers.CreateTariff)
 	api.GET("/key/:customer_id", controllers.GetKey)
 	api.PATCH("/key/:customer_id", controllers.UpdateKey)
 	api.POST("/verify", controllers.VerifyKey)
+	api.Use(middleware.AuthRequired)
+	{
+		api.POST("/tariff", controllers.CreateTariff)
+		api.DELETE("/tariff/:id", controllers.DeleteTariff)
+
+		api.POST("/customer", controllers.CreateCustomer)
+		api.PATCH("/customer/:id", controllers.UpdateCustomer)
+		api.DELETE("/customer/:id", controllers.DeleteCustomer)
+
+		api.POST("/subscriptions", controllers.CreateCustomer)
+		api.PATCH("/customer/:id", controllers.UpdateCustomer)
+		api.DELETE("/customer/:id", controllers.DeleteCustomer)
+	}
 
 	admin := r.Group("/admin")
 	admin.GET("/", controllers.MainHandler)
@@ -57,9 +71,11 @@ func setupRouter() *gin.Engine {
 	admin.POST("/logout", middleware.Logout)
 	admin.Use(middleware.AuthRequired)
 	{
-		admin.GET("/subscription/:id/*action", controllers.CustomerSubscriptionList)
 		admin.GET("/license/:id", controllers.DownloadLicense)
-		admin.GET("/tariffs", controllers.TariffsList)
+
+		admin.GET("/subscription/:id/*action", controllers.CustomerSubscriptionList)
+		admin.GET("/tariffs/*action", controllers.TariffsList)
+		admin.GET("/customers/*action", controllers.MainHandler)
 	}
 
 	return r

@@ -41,8 +41,9 @@ func (c *Customer) FindCustomerByID(uid uint32) (*Customer, error) {
 func (c *Customer) UpdateCustomer(uid uint32) (*Customer, error) {
 	db := config.DB.Model(&Customer{}).Where("id = ?", uid).Take(&Customer{}).UpdateColumns(
 		map[string]interface{}{
-			"name":      c.Name,
-			"update_at": time.Now(),
+			"name":       c.Name,
+			"status":     c.Status,
+			"updated_at": time.Now(),
 		},
 	)
 	if db.Error != nil {
@@ -57,7 +58,7 @@ func (c *Customer) UpdateCustomer(uid uint32) (*Customer, error) {
 }
 
 // DeleteCustomer is a ...
-func (c *Customer) DeleteCustomer(uid uint32) (int64, error) {
+func DeleteCustomer(uid uint32) (int64, error) {
 	db := config.DB.Model(&Customer{}).Where("id = ?", uid).Take(&Customer{}).Delete(&Customer{})
 	if db.Error != nil {
 		return 0, db.Error
@@ -68,7 +69,7 @@ func (c *Customer) DeleteCustomer(uid uint32) (int64, error) {
 // CustomersList is a ...
 func CustomersList() *[]Customer {
 	customers := []Customer{}
-	db := config.DB.Find(&customers)
+	db := config.DB.Order("ID asc").Find(&customers)
 	if db.Error != nil {
 		return &customers
 	}

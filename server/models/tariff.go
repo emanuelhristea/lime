@@ -66,7 +66,7 @@ func (t *Tariff) UpdateTariff(uid uint32) (*Tariff, error) {
 }
 
 // DeleteTariff is a ...
-func (t *Tariff) DeleteTariff(uid uint32) (int64, error) {
+func DeleteTariff(uid uint32) (int64, error) {
 	db := config.DB.Model(&Tariff{}).Where("id = ?", uid).Take(&Tariff{}).Delete(&Tariff{})
 	if db.Error != nil {
 		return 0, db.Error

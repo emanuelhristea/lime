@@ -7,7 +7,7 @@ import (
 )
 
 func formatAsDate(t time.Time) string {
-	return fmt.Sprintf("%d.%02d.%2d %02d:%02d:%02d",
+	return fmt.Sprintf("%d.%02d.%02d %02d:%02d:%02d",
 		t.Year(),
 		t.Month(),
 		t.Day(),
@@ -16,14 +16,26 @@ func formatAsDate(t time.Time) string {
 		t.Second())
 }
 
-func columnStatus(status bool) template.HTML {
-	resultat := ""
-	if status {
-		resultat = "<span class=\"column-green\">true</span>"
-	} else {
-		resultat = "<span class=\"column-red\">false</span>"
+func formatAsCheck(flag bool) string {
+	if flag {
+		return "✔️"
 	}
-	return template.HTML(resultat)
+	return "❌"
+}
+
+func formatAsPrice(price int) string {
+	realPrice := float64(price) / 100
+	return fmt.Sprintf("%.2f", realPrice)
+}
+
+func columnStatus(status bool) template.HTML {
+	result := ""
+	if status {
+		result = "<span class=\"column-green\">Active</span>"
+	} else {
+		result = "<span class=\"column-red\">Inactive</span>"
+	}
+	return template.HTML(result)
 }
 
 func keyBytesToString(data []byte) template.HTML {

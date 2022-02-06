@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/emanuelhristea/lime/license"
@@ -159,25 +160,230 @@ func UpdateKey(c *gin.Context) {
 }
 
 func CreateTariff(c *gin.Context) {
-	modelTariff := &models.Tariff{}
-	c.BindJSON(&modelTariff)
-	log.Print(modelTariff)
-
-	if modelTariff.Name == "" {
+	n := c.PostForm("name")
+	if n == "" {
 		respondJSON(c, http.StatusBadRequest, "Name is invalid")
 		return
 	}
 
-	if modelTariff.Price < 0 {
+	p := c.PostForm("price")
+	pr, err := strconv.ParseFloat(p, 64)
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Price format is invalid")
+		return
+	}
+
+	price := int(pr * 100)
+	if price < 0 {
 		respondJSON(c, http.StatusBadRequest, "Price cannot be negative")
 		return
 	}
 
+	tandem := false
+	if c.PostForm("tandem") == "on" {
+		tandem = true
+	}
+
+	triaxis := false
+	if c.PostForm("triaxis") == "on" {
+		triaxis = true
+	}
+
+	robots := false
+	if c.PostForm("robots") == "on" {
+		robots = true
+	}
+
+	u := c.PostForm("users")
+	users, err := strconv.ParseInt(u, 10, 32)
+	if err != nil || users < 1 || users > 100 {
+		respondJSON(c, http.StatusBadRequest, "Number of users is invalid")
+		return
+	}
+
+	modelTariff := &models.Tariff{
+		Name:    n,
+		Price:   price,
+		Tandem:  tandem,
+		Triaxis: triaxis,
+		Robots:  robots,
+		Users:   int(users),
+	}
+
 	_tariff, err := modelTariff.SaveTariff()
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _tariff.Name)
+}
+
+func DeleteTariff(c *gin.Context) {
+	id := c.Param("id")
+	tariffId, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respondJSON(c, http.StatusOK, _tariff.Name)
+	rows, err := models.DeleteTariff(uint32(tariffId))
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Cannot delete plan that is in use")
+		return
+	}
+
+	respondJSON(c, http.StatusOK, fmt.Sprintf("%d", rows))
+}
+
+func CreateCustomer(c *gin.Context) {
+	n := c.PostForm("name")
+	if n == "" {
+		respondJSON(c, http.StatusBadRequest, "Name is invalid")
+		return
+	}
+
+	status := false
+	if c.PostForm("status") == "on" {
+		status = true
+	}
+
+	modelCustomer := &models.Customer{
+		Name:   n,
+		Status: status,
+	}
+
+	_customer, err := modelCustomer.SaveCustomer()
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _customer.Name)
+}
+
+func UpdateCustomer(c *gin.Context) {
+	id := c.Param("id")
+	customerId, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	n := c.PostForm("name")
+	if n == "" {
+		respondJSON(c, http.StatusBadRequest, "Customer not found")
+		return
+	}
+
+	status := false
+	if c.PostForm("status") == "on" {
+		status = true
+	}
+	_customer := models.Customer{
+		Name:   n,
+		Status: status,
+	}
+
+	_, err = _customer.UpdateCustomer(uint32(customerId))
+
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _customer.Name)
+}
+
+func DeleteCustomer(c *gin.Context) {
+	id := c.Param("id")
+	customerId, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	rows, err := models.DeleteCustomer(uint32(customerId))
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Cannot delete customer that has active subscriptions")
+		return
+	}
+
+	respondJSON(c, http.StatusOK, fmt.Sprintf("%d", rows))
+}
+
+func CreateSubscription(c *gin.Context) {
+	n := c.PostForm("name")
+	if n == "" {
+		respondJSON(c, http.StatusBadRequest, "Name is invalid")
+		return
+	}
+
+	status := false
+	if c.PostForm("status") == "on" {
+		status = true
+	}
+
+	modelCustomer := &models.Customer{
+		Name:   n,
+		Status: status,
+	}
+
+	_customer, err := modelCustomer.SaveCustomer()
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _customer.Name)
+}
+
+func UpdateSubscription(c *gin.Context) {
+	id := c.Param("id")
+	customerId, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	n := c.PostForm("name")
+	if n == "" {
+		respondJSON(c, http.StatusBadRequest, "Customer not found")
+		return
+	}
+
+	status := false
+	if c.PostForm("status") == "on" {
+		status = true
+	}
+	_customer := models.Customer{
+		Name:   n,
+		Status: status,
+	}
+
+	_, err = _customer.UpdateCustomer(uint32(customerId))
+
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _customer.Name)
+}
+
+func DeleteSubscription(c *gin.Context) {
+	id := c.Param("id")
+	customerId, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	rows, err := models.DeleteCustomer(uint32(customerId))
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Cannot delete customer that has active subscriptions")
+		return
+	}
+
+	respondJSON(c, http.StatusOK, fmt.Sprintf("%d", rows))
 }
