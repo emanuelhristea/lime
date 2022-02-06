@@ -1,4 +1,4 @@
-{{define "subscriptions.html"}}
+{{define "tariffs.html"}}
 <!doctype html>
 <html lang="en">
 
@@ -22,40 +22,33 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Tariff</th>
-                        <th></th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Servers</th>
+                        <th>Companies</th>
                         <th>Created</th>
                         <th>Update</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{ range $key, $value := .Subscriptions }}
+                    {{ range $key, $value := .Tariffs }}
                     <tr>
-                        <td><b>{{$value.TariffName}}</b></td>
-                        <td>{{$value.StripeID}}</td>
+                        <td>{{$value.ID}}</td>
+                        <td><b>{{$value.Name}}</b></td>
+                        <td>{{$value.Price}}</td>
+                        <td>{{$value.Servers}}</td>
+                        <td>{{$value.Companies}}</td>
                         <td>{{$value.CreatedAt | formatAsDate}}</td>
                         <td>{{$value.UpdatedAt | formatAsDate}}</td>
-                        <td>{{ $value.Status | columnStatus}}</td>
                     </tr>
                     {{end}}
 
                     <tr>
                         <td class="td-noline"></td>
-                        <td colspan="4" class="td-new-license"><a href="/admin/subscription/{{.customerID}}/new">create new license</a></td>
+                        <td colspan="6" class="td-new-license"><a href="/admin/tariff/new">create new tariff</a></td>
                     </tr>
-                    {{ if .Licenses }}
-                    {{ range $key, $value := .Licenses }}
-                    <tr>
-                        <td class="td-noline"></td>
-                        <td class="td-license td-license-hash"><a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a></td>
-                        <td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
-                        <td class="td-license">{{$value.UpdatedAt | formatAsDate}}</td>
-                        <td class="td-license">{{$value.Status | columnStatus}}</td>
-                    </tr>
-                    {{end}}
-                    {{end}}
-
                 </tbody>
             </table>
         </section>

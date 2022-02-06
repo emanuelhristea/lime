@@ -12,14 +12,14 @@ import (
 
 var (
 	// ErrInvalidSignature is a ...
-	ErrInvalidSignature = errors.New("Invalid signature")
+	ErrInvalidSignature = errors.New("invalid signature")
 
 	// ErrMalformedLicense is a ...
-	ErrMalformedLicense = errors.New("Malformed License")
+	ErrMalformedLicense = errors.New("malformed license")
 
 	// generate new ed25519 key and replaces !!!
-	privateKey = []byte("5GvXN6OIrsgF3/ehJ17HvRPrrbNTLw/gtAmy4X5bKlH9rmXwQgFSVLt//nMsl0qFG28pjc1IN7PhgH01Z+QCTQ==")
-	publicKey  = []byte("/a5l8EIBUlS7f/5zLJdKhRtvKY3NSDez4YB9NWfkAk0=")
+	privateKey = []byte("M7JsfVjXCj/60wflqhWisMh0tzHC7ozEB55EjsOT8ZXEgIn1/wXJhpPV47NDLrsuIc6gdcQcesQmyk2OBMmsqw==")
+	publicKey  = []byte("xICJ9f8FyYaT1eOzQy67LiHOoHXEHHrEJspNjgTJrKs=")
 )
 
 // License is a ...
@@ -43,7 +43,7 @@ type Limits struct {
 
 // Expired is a ...
 func (l *License) Expired() bool {
-	return l.Exp.IsZero() == false && time.Now().After(l.Exp)
+	return !l.Exp.IsZero() && time.Now().After(l.Exp)
 }
 
 // Encode is a ...

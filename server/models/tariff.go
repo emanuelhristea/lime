@@ -11,10 +11,10 @@ import (
 type Tariff struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
 	Name      string    `gorm:"size:255;not null;unique" json:"name"`
-	Price     int       `gorm:"size:6;not null;unique" json:"price"`
-	Servers   int       `gorm:"size:6;not null;unique" json:"servers"`
-	Companies int       `gorm:"size:6;not null;unique" json:"companies"`
-	Users     int       `gorm:"size:6;not null;unique" json:"users"`
+	Price     int       `gorm:"size:6;not null" json:"price"`
+	Servers   int       `gorm:"size:6;not null" json:"servers"`
+	Companies int       `gorm:"size:6;not null" json:"companies"`
+	Users     int       `gorm:"size:6;not null" json:"users"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
@@ -70,4 +70,14 @@ func (t *Tariff) DeleteTariff(uid uint32) (int64, error) {
 		return 0, db.Error
 	}
 	return db.RowsAffected, nil
+}
+
+// tariffsList is a ...
+func TariffsList() *[]Tariff {
+	tariffs := []Tariff{}
+	db := config.DB.Find(&tariffs)
+	if db.Error != nil {
+		return &tariffs
+	}
+	return &tariffs
 }

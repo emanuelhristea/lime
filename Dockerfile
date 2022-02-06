@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.14 AS build-stage
+FROM golang:1.16-bullseye AS build-stage
 
 LABEL REPO="https://github.com/werbot/lime"
 
@@ -18,6 +18,13 @@ RUN make build-alpine
 # Final Stage
 FROM alpine:latest
 
+RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_x86_64 -O /usr/local/bin/dumb-init && \   
+    chmod +x /usr/local/bin/dumb-init && \
+    apk update && \
+    apk add curl && \
+    apk add ca-certificates wget && \
+    update-ca-certificates
+
 ARG GIT_COMMIT
 ARG VERSION
 LABEL REPO="https://github.com/werbot/lime"
@@ -33,6 +40,6 @@ RUN chmod +x /opt/bin/lime
 RUN adduser -D -g '' lime
 USER lime
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 
 CMD ["/opt/bin/lime"]

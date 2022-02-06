@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -23,10 +24,10 @@ import (
 func VerifyKey(c *gin.Context) {
 	modelLicense := models.License{}
 
-	reques := &requestLicense{}
-	c.BindJSON(&reques)
+	request := &requestLicense{}
+	c.BindJSON(&request)
 
-	licenseKey, err := base64.StdEncoding.DecodeString(reques.License)
+	licenseKey, err := base64.StdEncoding.DecodeString(request.License)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -67,10 +68,10 @@ func CreateKey(c *gin.Context) {
 	modelTariff := models.Tariff{}
 	modelCustomer := models.Customer{}
 
-	reques := &requestLicense{}
-	c.BindJSON(&reques)
+	request := &requestLicense{}
+	c.BindJSON(&request)
 
-	_subscription, err := modelSubscription.FindSubscriptionByStripeID(reques.StripeID)
+	_subscription, err := modelSubscription.FindSubscriptionByStripeID(request.StripeID)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -154,4 +155,28 @@ func GetKey(c *gin.Context) {
 // @Router /key/:customer_id [PATCH]
 func UpdateKey(c *gin.Context) {
 	respondJSON(c, http.StatusOK, "UpdateKey")
+}
+
+func CreateTariff(c *gin.Context) {
+	modelTariff := &models.Tariff{}
+	c.BindJSON(&modelTariff)
+	log.Print(modelTariff)
+
+	if modelTariff.Name == "" {
+		respondJSON(c, http.StatusBadRequest, "Name is invalid")
+		return
+	}
+
+	if modelTariff.Price < 0 {
+		respondJSON(c, http.StatusBadRequest, "Price cannot be negative")
+		return
+	}
+
+	_tariff, err := modelTariff.SaveTariff()
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _tariff.Name)
 }

@@ -22,20 +22,19 @@ func MainHandler(c *gin.Context) {
 
 	if user == nil {
 		c.HTML(http.StatusOK, "login.html", gin.H{
-			"title": "🔑 Autorisation",
+			"title": "🔑 Authorization",
 		})
 	} else {
 		customersList := models.CustomersList()
 		c.HTML(http.StatusOK, "customers.html", gin.H{
-			"title":     "🐱 Customers",
+			"title":     "Customers",
 			"customers": customersList,
 		})
 	}
-
 }
 
-// CustomerSubscrptionList is a ...
-func CustomerSubscrptionList(c *gin.Context) {
+// CustomerSubscriptionList is a ...
+func CustomerSubscriptionList(c *gin.Context) {
 	customerID := c.Param("id")
 	action := c.Param("action")
 	subscriptionsList := models.SubscriptionsByCustomerID(customerID)
@@ -89,7 +88,7 @@ func CustomerSubscrptionList(c *gin.Context) {
 		"title":         "🧩 Subscription and Licenses by " + (*subscriptionsList)[0].CustomerName,
 		"customerID":    customerID,
 		"Subscriptions": subscriptionsList,
-		"Licensies":     licensesList,
+		"Licenses":      licensesList,
 	})
 
 }
@@ -112,4 +111,13 @@ func DownloadLicense(c *gin.Context) {
 	contentType := "application/octet-stream"
 	extraHeaders := map[string]string{"Content-Disposition": `attachment; filename="` + license.Hash + `"`}
 	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
+func TariffsList(c *gin.Context) {
+
+	tariffsList := models.TariffsList()
+	c.HTML(http.StatusOK, "tariffs.html", gin.H{
+		"title":   "Tariffs",
+		"Tariffs": tariffsList,
+	})
 }

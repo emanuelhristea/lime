@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate"
+    viewBox="0 0 256 256" width="256pt" height="256pt">
+    <defs>
+        <clipPath id="_clipPath_RDv3d6jOl7Jtl3xj8tR4VT5Jrj0zskR6">
+            <rect width="256" height="256" />
+        </clipPath>
+    </defs>
+    <g clip-path="url(#_clipPath_RDv3d6jOl7Jtl3xj8tR4VT5Jrj0zskR6)">
+        <clipPath id="_clipPath_z9xIcUCQuv8osb6MyqLNt6VJhHvngEs4">
+            <rect x="0" y="0" width="256" height="256" transform="matrix(1,0,0,1,0,0)" fill="rgb(255,255,255)" />
+        </clipPath>
+        <g clip-path="url(#_clipPath_z9xIcUCQuv8osb6MyqLNt6VJhHvngEs4)">
+            <g>
+                <g>
+                    <path
+                        d=" M 159.131 8.156 C 73.618 17.931 0 109.445 0 234.629 L 17.115 234.629 C 17.126 109.445 76.029 29.305 159.131 8.156 Z "
+                        fill="rgb(0,0,0)" />
+                    <path
+                        d=" M 180.38 45.347 L 109.69 45.347 C 62.401 82.597 31.981 147.308 30.571 234.548 C 31.529 234.582 32.498 234.629 33.467 234.629 L 180.391 234.629 C 221.974 234.629 256 198.016 256 153.273 L 256 126.703 C 255.989 81.959 221.974 45.347 180.38 45.347 Z "
+                        fill="rgb(178,41,46)" />
+                    <clipPath id="_clipPath_oImSqCbOofGxodWfcl46CXQhDNcnmmfB">
+                        <rect x="91.186" y="0" width="98.992" height="255.945" transform="matrix(1,0,0,1,0,0)"
+                            fill="rgb(255,255,255)" />
+                    </clipPath>
+                    <g clip-path="url(#_clipPath_oImSqCbOofGxodWfcl46CXQhDNcnmmfB)">
+                        <g>
+                            <g clip-path="url(#_clipPath_f9ylyafoVUwLaMAfK9ztIcxv0G8zgyVi)"><text
+                                    transform="matrix(1.076,0,0,1.158,91.186,200.926)"
+                                    style="font-family:'Open Sans';font-weight:400;font-size:162.3px;font-style:normal;font-variant-ligatures:none;fill:#FFFFFF;stroke:none;">S</text>
+                            </g>
+                            <defs>
+                                <clipPath id="_clipPath_f9ylyafoVUwLaMAfK9ztIcxv0G8zgyVi">
+                                    <rect x="0" y="0" width="92" height="221.023"
+                                        transform="matrix(1.076,0,0,1.158,91.186,0.043)" />
+                                </clipPath>
+                            </defs>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

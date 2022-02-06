@@ -40,6 +40,7 @@ func setupRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	api.POST("/key", controllers.CreateKey)
+	api.POST("/tariff", controllers.CreateTariff)
 	api.GET("/key/:customer_id", controllers.GetKey)
 	api.PATCH("/key/:customer_id", controllers.UpdateKey)
 	api.POST("/verify", controllers.VerifyKey)
@@ -50,8 +51,9 @@ func setupRouter() *gin.Engine {
 	admin.POST("/logout", middleware.Logout)
 	admin.Use(middleware.AuthRequired)
 	{
-		admin.GET("/subscription/:id/*action", controllers.CustomerSubscrptionList)
+		admin.GET("/subscription/:id/*action", controllers.CustomerSubscriptionList)
 		admin.GET("/license/:id", controllers.DownloadLicense)
+		admin.GET("/tariffs", controllers.TariffsList)
 	}
 
 	return r
