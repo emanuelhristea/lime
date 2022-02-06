@@ -10,9 +10,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/emanuelhristea/lime/license"
+	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
-	"github.com/werbot/lime/license"
-	"github.com/werbot/lime/server/models"
 )
 
 // VerifyKey is a ...
@@ -94,9 +94,10 @@ func CreateKey(c *gin.Context) {
 	}
 
 	limit := license.Limits{
-		Servers:   _tariff.Servers,
-		Companies: _tariff.Companies,
-		Users:     _tariff.Users,
+		Tandem:  _tariff.Tandem,
+		Triaxis: _tariff.Triaxis,
+		Robots:  _tariff.Robots,
+		Users:   _tariff.Users,
 	}
 	metadata := []byte(`{"message": "test message"}`)
 	_license := &license.License{

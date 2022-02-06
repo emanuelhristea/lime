@@ -1,11 +1,11 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/werbot/lime)](https://goreportcard.com/report/github.com/werbot/lime) [![CodeFactor](https://www.codefactor.io/repository/github/werbot/lime/badge)](https://www.codefactor.io/repository/github/werbot/lime) ![Docker](https://github.com/werbot/lime/workflows/Docker/badge.svg) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/emanuelhristea/lime)](https://goreportcard.com/report/github.com/emanuelhristea/lime) [![CodeFactor](https://www.codefactor.io/repository/github/emanuelhristea/lime/badge)](https://www.codefactor.io/repository/github/emanuelhristea/lime) ![Docker](https://github.com/emanuelhristea/lime/workflows/Docker/badge.svg) 
 
-<img src="https://raw.githubusercontent.com/werbot/lime/master/.github/assets/lime.png" height="70" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/lime.png" height="70" />
 
 
 ## Installation 
 ```
-$ git clone https://github.com/werbot/lime.git
+$ git clone https://github.com/emanuelhristea/lime.git
 ```
 
 
@@ -29,9 +29,9 @@ $ go run main.go server
 ## Admin console
 Link for admin console http://localhost:8080/admin/
 default login - admin, password - admin
-<img src="https://raw.githubusercontent.com/werbot/lime/master/.github/assets/admin/login.png" />
-<img src="https://raw.githubusercontent.com/werbot/lime/master/.github/assets/admin/customers.png" />
-<img src="https://raw.githubusercontent.com/werbot/lime/master/.github/assets/admin/subscriptions.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/login.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/customers.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/subscriptions.png" />
 
 
 ## API list

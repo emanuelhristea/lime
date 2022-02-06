@@ -3,46 +3,46 @@ package seed
 import (
 	"log"
 
+	"github.com/emanuelhristea/lime/server/models"
 	"github.com/jinzhu/gorm"
-	"github.com/werbot/lime/server/models"
 )
 
 var tariffs = []models.Tariff{
 	{
-		Name:      "Garage",
-		Price:     590,
-		Servers:   10,
-		Companies: 10,
-		Users:     10,
+		Name:    "Trial",
+		Price:   0,
+		Tandem:  true,
+		Triaxis: false,
+		Robots:  true,
+		Users:   1,
 	},
 	{
-		Name:      "Startup",
-		Price:     1990,
-		Servers:   20,
-		Companies: 20,
-		Users:     20,
+		Name:    "Tandem",
+		Price:   2500,
+		Tandem:  true,
+		Triaxis: false,
+		Robots:  false,
+		Users:   20,
+	},
+	{
+		Name:    "Triaxis",
+		Price:   2500,
+		Tandem:  false,
+		Triaxis: true,
+		Robots:  false,
+		Users:   20,
 	},
 }
 
 var customers = []models.Customer{
 	{
 		ID:     1,
-		Name:   "Alex Past",
+		Name:   "Andrei Oana",
 		Status: true,
 	},
 	{
 		ID:     2,
-		Name:   "Lisa Boston",
-		Status: true,
-	},
-	{
-		ID:     3,
-		Name:   "Adam Potar",
-		Status: true,
-	},
-	{
-		ID:     4,
-		Name:   "Greg Gordon",
+		Name:   "Emanuel Hristea",
 		Status: true,
 	},
 }
@@ -59,18 +59,6 @@ var subscription = []models.Subscription{
 		StripeID:   "cus_APBaLDeqQoVy8m",
 		TariffID:   2,
 		Status:     true,
-	},
-	{
-		CustomerID: 3,
-		StripeID:   "cus_FEDajfeqSkTy01",
-		TariffID:   2,
-		Status:     true,
-	},
-	{
-		CustomerID: 4,
-		StripeID:   "cus_GGjdLDeqQokfj5",
-		TariffID:   1,
-		Status:     false,
 	},
 }
 

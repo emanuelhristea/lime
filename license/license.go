@@ -36,9 +36,10 @@ type License struct {
 
 // Limits is a ...
 type Limits struct {
-	Servers   int `json:"servers"`
-	Companies int `json:"companies"`
-	Users     int `json:"users"`
+	Tandem  bool `json:"tandem"`
+	Triaxis bool `json:"triaxis"`
+	Robots  bool `json:"robots"`
+	Users   int  `json:"users"`
 }
 
 // Expired is a ...

@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/emanuelhristea/lime/config"
 	"github.com/jinzhu/gorm"
-	"github.com/werbot/lime/config"
 )
 
 // Customer is a ...

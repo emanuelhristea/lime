@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/werbot/lime/cmd"
+	"github.com/emanuelhristea/lime/cmd"
 )
 
 func main() {

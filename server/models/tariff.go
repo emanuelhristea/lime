@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/emanuelhristea/lime/config"
 	"github.com/jinzhu/gorm"
-	"github.com/werbot/lime/config"
 )
 
 // Tariff is a ...
@@ -12,8 +12,9 @@ type Tariff struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
 	Name      string    `gorm:"size:255;not null;unique" json:"name"`
 	Price     int       `gorm:"size:6;not null" json:"price"`
-	Servers   int       `gorm:"size:6;not null" json:"servers"`
-	Companies int       `gorm:"size:6;not null" json:"companies"`
+	Tandem    bool      `gorm:"size:1;not null" json:"crossbar"`
+	Triaxis   bool      `gorm:"size:1;not null" json:"triaxis"`
+	Robots    bool      `gorm:"size:1;not null" json:"robots"`
 	Users     int       `gorm:"size:6;not null" json:"users"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
@@ -46,8 +47,9 @@ func (t *Tariff) UpdateTariff(uid uint32) (*Tariff, error) {
 		map[string]interface{}{
 			"name":      t.Name,
 			"price":     t.Price,
-			"servers":   t.Servers,
-			"companies": t.Companies,
+			"tandem":    t.Tandem,
+			"triaxis":   t.Triaxis,
+			"robots":    t.Robots,
 			"users":     t.Users,
 			"update_at": time.Now(),
 		},

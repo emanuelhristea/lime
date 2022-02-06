@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/emanuelhristea/lime/version"
 	"github.com/spf13/cobra"
-	"github.com/werbot/lime/version"
 )
 
 var rootCmd = &cobra.Command{

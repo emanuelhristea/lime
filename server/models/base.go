@@ -3,7 +3,7 @@ package models
 import (
 	"errors"
 
-	"github.com/werbot/lime/config"
+	"github.com/emanuelhristea/lime/config"
 )
 
 var (

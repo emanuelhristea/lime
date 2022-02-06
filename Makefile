@@ -6,7 +6,7 @@ VERSION := $(shell grep "const Version " version/version.go | sed -E 's/.*"(.+)"
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 BUILD_DATE=$(shell date '+%Y-%m-%d-%H:%M:%S')
-IMAGE_NAME := "werbot/lime"
+IMAGE_NAME := "emanuelhristea/lime"
 
 default: test
 
@@ -27,7 +27,7 @@ help:
 build:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
-	go build -ldflags "-X github.com/werbot/lime/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/werbot/lime/version.BuildDate=${BUILD_DATE}" -o bin/${BIN_NAME}
+	go build -ldflags "-X github.com/emanuelhristea/lime/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/emanuelhristea/lime/version.BuildDate=${BUILD_DATE}" -o bin/${BIN_NAME}
 
 get-deps:
 	dep ensure
@@ -35,7 +35,7 @@ get-deps:
 build-alpine:
 	@echo "building ${BIN_NAME} ${VERSION}"
 	@echo "GOPATH=${GOPATH}"
-	go build -ldflags '-w -linkmode external -extldflags "-static" -X github.com/werbot/lime/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/werbot/server/version.BuildDate=${BUILD_DATE}' -o bin/${BIN_NAME}
+	go build -ldflags '-w -linkmode external -extldflags "-static" -X github.com/emanuelhristea/lime/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/emanuelhristea/server/version.BuildDate=${BUILD_DATE}' -o bin/${BIN_NAME}
 
 package:
 	@echo "building image ${BIN_NAME} ${VERSION} $(GIT_COMMIT)"

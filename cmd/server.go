@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/emanuelhristea/lime/server"
+	"github.com/emanuelhristea/lime/version"
 	"github.com/spf13/cobra"
-	"github.com/werbot/lime/server"
-	"github.com/werbot/lime/version"
 )
 
 var banner = "license server\nversion " + version.Version + "\nhash:" + version.GitCommit
@@ -16,7 +16,8 @@ var serverCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(banner)
-		server.Start()
+		fmt.Println(args)
+		server.Start(args)
 	},
 }
 

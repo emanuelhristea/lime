@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emanuelhristea/lime/license"
+	"github.com/emanuelhristea/lime/server/middleware"
+	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/werbot/lime/license"
-	"github.com/werbot/lime/server/middleware"
-	"github.com/werbot/lime/server/models"
 )
 
 // MainHandler is a ...
@@ -49,9 +49,10 @@ func CustomerSubscriptionList(c *gin.Context) {
 		_tariff, _ := modelTariff.FindTariffByID((*subscriptionsList)[0].ID)
 
 		limit := license.Limits{
-			Servers:   _tariff.Servers,
-			Companies: _tariff.Companies,
-			Users:     _tariff.Users,
+			Tandem:  _tariff.Tandem,
+			Triaxis: _tariff.Triaxis,
+			Robots:  _tariff.Robots,
+			Users:   _tariff.Users,
 		}
 		metadata := []byte(`{"message": "test message"}`)
 		_license := &license.License{

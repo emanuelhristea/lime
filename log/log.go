@@ -3,8 +3,8 @@ package log
 import (
 	"os"
 
+	"github.com/emanuelhristea/lime/config"
 	"github.com/sirupsen/logrus"
-	"github.com/werbot/lime/config"
 )
 
 // Logger is a ...

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/emanuelhristea/lime/license"
 	"github.com/spf13/cobra"
-	"github.com/werbot/lime/license"
 )
 
 var pairKeyCmd = &cobra.Command{

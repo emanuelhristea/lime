@@ -4,20 +4,26 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/emanuelhristea/lime/config"
+	"github.com/emanuelhristea/lime/server/controllers"
+	"github.com/emanuelhristea/lime/server/middleware"
+	"github.com/emanuelhristea/lime/server/seed"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/werbot/lime/config"
-	"github.com/werbot/lime/server/controllers"
-	"github.com/werbot/lime/server/middleware"
 )
 
 // Start is a ...
-func Start() {
+func Start(args []string) {
 	cfg := config.Config()
 	gin.SetMode(cfg.GetString("mode"))
 	r := setupRouter()
 
-	//seed.Load(config.DB)
+	for _, arg := range args {
+		switch arg {
+		case "seed":
+			seed.Load(config.DB)
+		}
+	}
 
 	err := r.Run(cfg.GetString("port"))
 	if err != nil {

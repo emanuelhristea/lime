@@ -1,15 +1,15 @@
 # Build Stage
 FROM golang:1.16-bullseye AS build-stage
 
-LABEL REPO="https://github.com/werbot/lime"
+LABEL REPO="https://github.com/emanuelhristea/lime"
 
-ENV PROJPATH=/go/src/github.com/werbot/lime
+ENV PROJPATH=/go/src/github.com/emanuelhristea/lime
 
 # Because of https://github.com/docker/docker/issues/14914
 ENV PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
-ADD . /go/src/github.com/werbot/lime
-WORKDIR /go/src/github.com/werbot/lime
+ADD . /go/src/github.com/emanuelhristea/lime
+WORKDIR /go/src/github.com/emanuelhristea/lime
 
 RUN make build-alpine
 
@@ -27,13 +27,13 @@ RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.
 
 ARG GIT_COMMIT
 ARG VERSION
-LABEL REPO="https://github.com/werbot/lime"
+LABEL REPO="https://github.com/emanuelhristea/lime"
 LABEL GIT_COMMIT=$GIT_COMMIT
 LABEL VERSION=$VERSION
 
 WORKDIR /opt/bin
 
-COPY --from=build-stage /go/src/github.com/werbot/lime/bin/lime /opt/bin/
+COPY --from=build-stage /go/src/github.com/emanuelhristea/lime/bin/lime /opt/bin/
 RUN chmod +x /opt/bin/lime
 
 # Create appuser
