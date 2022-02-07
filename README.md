@@ -48,7 +48,7 @@ default login - admin, password - admin
 - [ ] Auto-create and install license on the client
 - [x] Command-line utility for generating key pair 
 - [ ] Integration with Stripe
-- [ ] Example client
+- [x] Example client
 - [x] Admin console
 - [ ] Support IP address check
 - [ ] Support country check

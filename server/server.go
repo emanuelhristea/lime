@@ -53,6 +53,8 @@ func setupRouter() *gin.Engine {
 	api.POST("/verify", controllers.VerifyKey)
 	api.Use(middleware.AuthRequired)
 	{
+		api.GET("/tariffs", controllers.GetTariffList)
+		api.GET("/tariff/:id", controllers.GetTariff)
 		api.POST("/tariff", controllers.CreateTariff)
 		api.DELETE("/tariff/:id", controllers.DeleteTariff)
 
@@ -60,9 +62,9 @@ func setupRouter() *gin.Engine {
 		api.PATCH("/customer/:id", controllers.UpdateCustomer)
 		api.DELETE("/customer/:id", controllers.DeleteCustomer)
 
-		api.POST("/subscriptions", controllers.CreateCustomer)
-		api.PATCH("/customer/:id", controllers.UpdateCustomer)
-		api.DELETE("/customer/:id", controllers.DeleteCustomer)
+		api.POST("/customer/:id/subscription", controllers.CreateSubscription)
+		api.PATCH("/customer/:id/subscription/:id", controllers.UpdateSubscription)
+		api.DELETE("/customer/:id/subscription/:id", controllers.DeleteSubscription)
 	}
 
 	admin := r.Group("/admin")
@@ -72,8 +74,9 @@ func setupRouter() *gin.Engine {
 	admin.Use(middleware.AuthRequired)
 	{
 		admin.GET("/license/:id", controllers.DownloadLicense)
-
-		admin.GET("/subscription/:id/*action", controllers.CustomerSubscriptionList)
+		admin.GET("/customer/:id/subscription/*action", controllers.CustomerSubscriptionAction)
+		admin.GET("/customer/:id/subscriptions/*action", controllers.CustomerSubscriptionList)
+		admin.GET("/customer/:id/sub/:sid/license/*action", controllers.CustomerSubscriptionLicenseAction)
 		admin.GET("/tariffs/*action", controllers.TariffsList)
 		admin.GET("/customers/*action", controllers.MainHandler)
 	}

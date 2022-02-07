@@ -68,6 +68,11 @@ func Load(db *gorm.DB) {
 	// if err != nil {
 	// 	log.Fatalf("cannot drop table: %v", err)
 	// }
+	db.DropTableIfExists(&models.License{})
+	db.DropTableIfExists(&models.Subscription{})
+	db.DropTableIfExists(&models.Customer{})
+	db.DropTableIfExists(&models.Tariff{})
+
 	err := db.AutoMigrate(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
 
 	if err != nil {

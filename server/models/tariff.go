@@ -9,15 +9,17 @@ import (
 
 // Tariff is a ...
 type Tariff struct {
-	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	Name      string    `gorm:"size:255;not null;unique" json:"name"`
-	Price     int       `gorm:"size:6;not null" json:"price"`
-	Tandem    bool      `gorm:"size:1;not null" json:"crossbar"`
-	Triaxis   bool      `gorm:"size:1;not null" json:"triaxis"`
-	Robots    bool      `gorm:"size:1;not null" json:"robots"`
-	Users     int       `gorm:"size:6;not null" json:"users"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID            uint64         `gorm:"primary_key;auto_increment" json:"id"`
+	Name          string         `gorm:"size:255;not null;unique" json:"name"`
+	Price         int            `gorm:"size:6;not null" json:"price"`
+	Tandem        bool           `gorm:"size:1;not null" json:"crossbar"`
+	Triaxis       bool           `gorm:"size:1;not null" json:"triaxis"`
+	Robots        bool           `gorm:"size:1;not null" json:"robots"`
+	Users         int            `gorm:"size:6;not null" json:"users"`
+	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	DeletedAt     *time.Time     `sql:"index" json:"deleted_at"`
+	Subscriptions []Subscription `json:"subscriptions"`
 }
 
 // SaveTariff is a ...
@@ -30,7 +32,7 @@ func (t *Tariff) SaveTariff() (*Tariff, error) {
 }
 
 // FindTariffByID is a ...
-func (t *Tariff) FindTariffByID(uid uint32) (*Tariff, error) {
+func (t *Tariff) FindTariffByID(uid uint64) (*Tariff, error) {
 	err := config.DB.Model(Tariff{}).Where("id = ?", uid).Take(&t).Error
 	if err != nil {
 		return &Tariff{}, err
@@ -42,7 +44,7 @@ func (t *Tariff) FindTariffByID(uid uint32) (*Tariff, error) {
 }
 
 // UpdateTariff is a ...
-func (t *Tariff) UpdateTariff(uid uint32) (*Tariff, error) {
+func (t *Tariff) UpdateTariff(uid uint64) (*Tariff, error) {
 	db := config.DB.Model(&Tariff{}).Where("id = ?", uid).Take(&Tariff{}).UpdateColumns(
 		map[string]interface{}{
 			"name":      t.Name,
@@ -66,7 +68,7 @@ func (t *Tariff) UpdateTariff(uid uint32) (*Tariff, error) {
 }
 
 // DeleteTariff is a ...
-func DeleteTariff(uid uint32) (int64, error) {
+func DeleteTariff(uid uint64) (int64, error) {
 	db := config.DB.Model(&Tariff{}).Where("id = ?", uid).Take(&Tariff{}).Delete(&Tariff{})
 	if db.Error != nil {
 		return 0, db.Error
@@ -75,9 +77,14 @@ func DeleteTariff(uid uint32) (int64, error) {
 }
 
 // tariffsList is a ...
-func TariffsList() *[]Tariff {
+func TariffsList(relations ...string) *[]Tariff {
+	db := config.DB
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
 	tariffs := []Tariff{}
-	db := config.DB.Find(&tariffs)
+	db = db.Find(&tariffs)
 	if db.Error != nil {
 		return &tariffs
 	}

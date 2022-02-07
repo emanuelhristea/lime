@@ -29,6 +29,7 @@
                         <th>Tandem</th>
                         <th>Triaxis</th>
                         <th>Robots</th>
+                        <th>Users</th>
                         <th>Created at</th>
                         <th>Updated at</th>
                         <th>Action</th>
@@ -56,6 +57,7 @@
                         {{else}}
                             <td style="text-align: center; vertical-align: middle;"><b style="color:#EE4B2B">&#10006;</b></td>
                         {{end}}
+                        <td>{{$value.Users}}</td>
                         <td>{{$value.CreatedAt | formatAsDate}}</td>
                         <td>{{$value.UpdatedAt | formatAsDate}}</td>
                         <td style="text-align: center; vertical-align: middle;"><a id="delete_tariff_{{$value.ID}}" href="#" title="Delete {{$value.Name}}"><b>&#x1F5D1;</b></a></td>
@@ -64,7 +66,7 @@
 
                     <tr>
                         <td class="td-noline"></td>
-                        <td colspan="8" class="td-new-license"><a href="/admin/tariffs/new">create new plan</a></td>
+                        <td colspan="9" class="td-new-license"><a href="/admin/tariffs/new">create new plan</a></td>
                     </tr>
                 </tbody>
             </table>

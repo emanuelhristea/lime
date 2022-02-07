@@ -20,29 +20,25 @@
             <h3 class="title">{{.title}}</h3>
             <div id="subscription_result"></div>
             <form method="post" id="subscription_form" action="">
-                <input type="text" placeholder="Name" name="name">
-                <input type="number" step=0.01 placeholder="Price" name="price">
+                <input type="text" placeholder="Stripe ID" name="stripe_id">
+                <label>Select a plan: </label>
+                <select placeholder="Tariff ID" name="tariff_id">
+                    {{range $key, $value := .Tariffs}}
+                      <option value="{{ $value.ID }}">{{ $value.Name }}</option>
+                    {{end}}              
+                  </select>
                 <label>
-                    <input type="checkbox" placeholder="Tandem" name="tandem">
-                    Tandem
+                    <input type="checkbox" placeholder="Status" name="status">
+                    Active
                 </label>
-                <label>
-                    <input type="checkbox" placeholder="Triaxis" name="triaxis">
-                    Triaxis
-                </label>
-                <label>
-                    <input type="checkbox" placeholder="Robots" name="robots">
-                    Robots
-                </label>
-                <input type="number" min="1" max="50"  placeholder="Users" name="users">
-                <input class="button-primary" type="submit" id="create_subscription" value="Submit">
+                <input class="button-primary" type="submit" id="create_subscription_{{.customerID}}" value="Submit">
                 <input class="button" type="button" id="cancel_subscription" onclick="history.back()" value="Cancel" />
             </form>
         </section>
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="/assets/js/main.js"  async defer></script>
-    <script src="/assets/js/tariff.js"  async defer></script>
+    <script src="/assets/js/subscriptions.js" async defer></script>
 </body>
 
 </html>

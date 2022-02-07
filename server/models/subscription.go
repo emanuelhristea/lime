@@ -9,13 +9,17 @@ import (
 
 // Subscription is a ...
 type Subscription struct {
-	ID         uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	StripeID   string    `gorm:"size:18;not null;unique" json:"stripe_id"`
-	CustomerID uint32    `sql:"type:int REFERENCES customers(id)" json:"customer_id"`
-	TariffID   uint32    `sql:"type:int REFERENCES tariffs(id)" json:"tariff_id"`
-	Status     bool      `gorm:"false" json:"status"`
-	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID         uint64     `gorm:"primary_key;auto_increment" json:"id"`
+	StripeID   string     `gorm:"size:18;not null;unique" json:"stripe_id"`
+	CustomerID uint64     `sql:"unique_index:idx_member;type:int REFERENCES customers(id) ON DELETE CASCADE" json:"customer_id"`
+	TariffID   uint64     `sql:"unique_index:idx_member;type:int REFERENCES tariffs(id) ON DELETE CASCADE" json:"tariff_id"`
+	Status     bool       `gorm:"false" json:"status"`
+	CreatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
+	Customer   Customer   `json:"customer"`
+	Tariff     Tariff     `json:"tariff"`
+	Licenses   []License  `json:"licenses"`
 }
 
 // SaveSubscription is a ...
@@ -28,7 +32,7 @@ func (s *Subscription) SaveSubscription() (*Subscription, error) {
 }
 
 // FindSubscriptionByID is a ...
-func (s *Subscription) FindSubscriptionByID(uid uint32) (*Subscription, error) {
+func (s *Subscription) FindSubscriptionByID(uid uint64) (*Subscription, error) {
 	err := config.DB.Model(Subscription{}).Where("id = ?", uid).Take(&s).Error
 	if err != nil {
 		return &Subscription{}, err
@@ -52,7 +56,7 @@ func (s *Subscription) FindSubscriptionByStripeID(stripeID string) (*Subscriptio
 }
 
 // UpdateSubscription is a ...
-func (s *Subscription) UpdateSubscription(uid uint32) (*Subscription, error) {
+func (s *Subscription) UpdateSubscription(uid uint64) (*Subscription, error) {
 	db := config.DB.Model(&Subscription{}).Where("id = ?", uid).Take(&Subscription{}).UpdateColumns(
 		map[string]interface{}{
 			"customer_id": s.CustomerID,
@@ -74,7 +78,7 @@ func (s *Subscription) UpdateSubscription(uid uint32) (*Subscription, error) {
 }
 
 // DeleteSubscription is a ...
-func DeleteSubscription(uid uint32) (int64, error) {
+func DeleteSubscription(uid uint64) (int64, error) {
 	db := config.DB.Model(&Subscription{}).Where("id = ?", uid).Take(&Subscription{}).Delete(&Subscription{})
 	if db.Error != nil {
 		return 0, db.Error
@@ -84,11 +88,11 @@ func DeleteSubscription(uid uint32) (int64, error) {
 
 // CustomerSubscriptionsList is a ...
 type CustomerSubscriptionsList struct {
-	ID           uint32    `json:"id"`
+	ID           uint64    `json:"id"`
 	StripeID     string    `json:"stripe_id"`
 	CustomerID   string    `json:"customer_id"`
 	CustomerName string    `json:"customer_name"`
-	TariffID     uint32    `json:"tariff_id"`
+	TariffID     uint64    `json:"tariff_id"`
 	TariffName   string    `json:"tariff_name"`
 	Status       bool      `json:"status"`
 	CreatedAt    time.Time `json:"created_at"`

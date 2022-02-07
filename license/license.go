@@ -26,7 +26,7 @@ var (
 type License struct {
 	Iss string          `json:"iss,omitempty"` // Issued By
 	Cus string          `json:"cus,omitempty"` // Customer ID
-	Sub uint32          `json:"sub,omitempty"` // Subscriber ID
+	Sub uint64          `json:"sub,omitempty"` // Subscriber ID
 	Typ string          `json:"typ,omitempty"` // License Type
 	Lim Limits          `json:"lim,omitempty"` // License Limit (e.g. Site)
 	Iat time.Time       `json:"iat,omitempty"` // Issued At

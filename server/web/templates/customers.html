@@ -34,8 +34,8 @@
                 <tbody>
                     {{ range $i,$value := .customers}}
                     <tr>
-                        <td><a href="/admin/subscription/{{$value.ID}}/">{{$value.ID}}</a></td>
-                        <td><a href="/admin/subscription/{{$value.ID}}/">{{$value.Name}}</a></td>
+                        <td><a href="/admin/customer/{{$value.ID}}/subscriptions/">{{$value.ID}}</a></td>
+                        <td><a href="/admin/customer/{{$value.ID}}/subscriptions/">{{$value.Name}}</a></td>
                         <td>{{$value.CreatedAt | formatAsDate}}</td>
                         <td>{{$value.UpdatedAt | formatAsDate}}</td>
                         <td style="text-align: center; vertical-align: middle;">

@@ -1,12 +1,13 @@
 $(document).ready(function () {
-    $("#create_subscription").click(
+    $("input[id^='create_subscription']").click(
         function () {
+            var id = this.id.replace("create_subscription_","");
             $.ajax({
-                url: "/api/subscription",
+                url: `/api/customer/${id}/subscription`,
                 type: "POST",
                 data: $('#subscription_form').serialize(),
                 success: function () {
-                    location.replace('/admin/');
+                    location.replace(`admin/customer/${id}/subscriptions/`);
                 },
                 error: function (xhr, status, error) {
                     var err = eval("(" + xhr.responseText + ")");
@@ -21,8 +22,9 @@ $(document).ready(function () {
     $("a[id^='delete_subscription']").click(
         function () {
             var id = this.id.replace("delete_subscription_","");
+            var customerId = this.customerId;
             $.ajax({
-                url: "/api/subscription/"+id,
+                url: `/api/customer${customerId}/subscription/${id}`,
                 type: "DELETE",
                 success: function () {
                     location.reload();
@@ -42,7 +44,7 @@ $(document).ready(function () {
             var id = this.id.replace("enable_subscription_","");
             var subscription = this.title.replace("Enable subscription ", "")
             $.ajax({
-                url: "/api/subscription/"+id,
+                url: `/api/customer/${customerId}/subscription/${id}`,
                 type: "PATCH",
                 data: {name: subscription, status: "on"},
                 success: function () {
@@ -63,7 +65,7 @@ $(document).ready(function () {
             var id = this.id.replace("disable_subscription_","");
             var subscription = this.title.replace("Disable subscription ", "")
             $.ajax({
-                url: "/api/subscription/"+id,
+                url: `/api/subscription/${id}`,
                 type: "PATCH",
                 data: {name: subscription, status: "off"},
                 success: function () {

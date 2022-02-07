@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -29,12 +30,13 @@ func VerifyKey(c *gin.Context) {
 	c.BindJSON(&request)
 
 	licenseKey, err := base64.StdEncoding.DecodeString(request.License)
+	log.Print(licenseKey)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
-
 	_license, err := modelLicense.FindLicense(licenseKey)
+	log.Print(_license)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -159,6 +161,34 @@ func UpdateKey(c *gin.Context) {
 	respondJSON(c, http.StatusOK, "UpdateKey")
 }
 
+func GetTariffList(c *gin.Context) {
+	preload, exists := c.GetQuery("load")
+	log.Print(preload)
+	tariffsList := &[]models.Tariff{}
+	if exists {
+		tariffsList = models.TariffsList(preload)
+	} else {
+		tariffsList = models.TariffsList()
+	}
+	c.JSON(http.StatusOK, tariffsList)
+}
+
+func GetTariff(c *gin.Context) {
+	id := c.Param("id")
+	tariffId, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+	modelTariff := models.Tariff{}
+	_tariff, err := modelTariff.FindTariffByID(tariffId)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, _tariff)
+}
+
 func CreateTariff(c *gin.Context) {
 	n := c.PostForm("name")
 	if n == "" {
@@ -195,7 +225,7 @@ func CreateTariff(c *gin.Context) {
 	}
 
 	u := c.PostForm("users")
-	users, err := strconv.ParseInt(u, 10, 32)
+	users, err := strconv.ParseInt(u, 10, 64)
 	if err != nil || users < 1 || users > 100 {
 		respondJSON(c, http.StatusBadRequest, "Number of users is invalid")
 		return
@@ -221,13 +251,13 @@ func CreateTariff(c *gin.Context) {
 
 func DeleteTariff(c *gin.Context) {
 	id := c.Param("id")
-	tariffId, err := strconv.ParseUint(id, 10, 32)
+	tariffId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	rows, err := models.DeleteTariff(uint32(tariffId))
+	rows, err := models.DeleteTariff(tariffId)
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Cannot delete plan that is in use")
 		return
@@ -255,7 +285,7 @@ func CreateCustomer(c *gin.Context) {
 
 	_customer, err := modelCustomer.SaveCustomer()
 	if err != nil {
-		respondJSON(c, http.StatusBadRequest, err.Error())
+		respondJSON(c, http.StatusBadRequest, "Cannot save customer, probably duplicate name")
 		return
 	}
 
@@ -264,7 +294,7 @@ func CreateCustomer(c *gin.Context) {
 
 func UpdateCustomer(c *gin.Context) {
 	id := c.Param("id")
-	customerId, err := strconv.ParseUint(id, 10, 32)
+	customerId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -285,7 +315,7 @@ func UpdateCustomer(c *gin.Context) {
 		Status: status,
 	}
 
-	_, err = _customer.UpdateCustomer(uint32(customerId))
+	_, err = _customer.UpdateCustomer(customerId)
 
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
@@ -297,13 +327,13 @@ func UpdateCustomer(c *gin.Context) {
 
 func DeleteCustomer(c *gin.Context) {
 	id := c.Param("id")
-	customerId, err := strconv.ParseUint(id, 10, 32)
+	customerId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	rows, err := models.DeleteCustomer(uint32(customerId))
+	rows, err := models.DeleteCustomer(customerId)
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Cannot delete customer that has active subscriptions")
 		return
@@ -313,9 +343,15 @@ func DeleteCustomer(c *gin.Context) {
 }
 
 func CreateSubscription(c *gin.Context) {
-	n := c.PostForm("name")
-	if n == "" {
+	stripe := c.PostForm("stripe_id")
+	if stripe == "" {
 		respondJSON(c, http.StatusBadRequest, "Name is invalid")
+		return
+	}
+
+	tariff, err := strconv.ParseUint(c.PostForm("tariff_id"), 10, 64)
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Invalid plan selected")
 		return
 	}
 
@@ -324,23 +360,32 @@ func CreateSubscription(c *gin.Context) {
 		status = true
 	}
 
-	modelCustomer := &models.Customer{
-		Name:   n,
-		Status: status,
-	}
-
-	_customer, err := modelCustomer.SaveCustomer()
+	id := c.Param("id")
+	customerId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		respondJSON(c, http.StatusBadRequest, err.Error())
+		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respondJSON(c, http.StatusOK, _customer.Name)
+	modelSubscription := &models.Subscription{
+		StripeID:   stripe,
+		TariffID:   tariff,
+		CustomerID: customerId,
+		Status:     status,
+	}
+
+	_subscription, err := modelSubscription.SaveSubscription()
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, "Cannot save subscription. Duplicate payment id or plan")
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _subscription.StripeID)
 }
 
 func UpdateSubscription(c *gin.Context) {
 	id := c.Param("id")
-	customerId, err := strconv.ParseUint(id, 10, 32)
+	customerId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -361,7 +406,7 @@ func UpdateSubscription(c *gin.Context) {
 		Status: status,
 	}
 
-	_, err = _customer.UpdateCustomer(uint32(customerId))
+	_, err = _customer.UpdateCustomer(customerId)
 
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
@@ -373,13 +418,13 @@ func UpdateSubscription(c *gin.Context) {
 
 func DeleteSubscription(c *gin.Context) {
 	id := c.Param("id")
-	customerId, err := strconv.ParseUint(id, 10, 32)
+	customerId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	rows, err := models.DeleteCustomer(uint32(customerId))
+	rows, err := models.DeleteCustomer(customerId)
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Cannot delete customer that has active subscriptions")
 		return
