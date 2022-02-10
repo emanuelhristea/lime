@@ -16,13 +16,6 @@ func formatAsDate(t time.Time) string {
 		t.Second())
 }
 
-func formatAsCheck(flag bool) string {
-	if flag {
-		return "✔️"
-	}
-	return "❌"
-}
-
 func formatAsPrice(price int) string {
 	realPrice := float64(price) / 100
 	return fmt.Sprintf("%.2f", realPrice)
@@ -31,7 +24,7 @@ func formatAsPrice(price int) string {
 func columnStatus(status bool) template.HTML {
 	result := ""
 	if status {
-		result = "<span class=\"column-green\">Active</span>"
+		result = "<span class=\"column-green\">&nbsp;Active&nbsp;</span>"
 	} else {
 		result = "<span class=\"column-red\">Inactive</span>"
 	}

@@ -18,7 +18,6 @@ type Tariff struct {
 	Users         int            `gorm:"size:6;not null" json:"users"`
 	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt     *time.Time     `sql:"index" json:"deleted_at"`
 	Subscriptions []Subscription `json:"subscriptions"`
 }
 
@@ -47,13 +46,13 @@ func (t *Tariff) FindTariffByID(uid uint64) (*Tariff, error) {
 func (t *Tariff) UpdateTariff(uid uint64) (*Tariff, error) {
 	db := config.DB.Model(&Tariff{}).Where("id = ?", uid).Take(&Tariff{}).UpdateColumns(
 		map[string]interface{}{
-			"name":      t.Name,
-			"price":     t.Price,
-			"tandem":    t.Tandem,
-			"triaxis":   t.Triaxis,
-			"robots":    t.Robots,
-			"users":     t.Users,
-			"update_at": time.Now(),
+			"name":       t.Name,
+			"price":      t.Price,
+			"tandem":     t.Tandem,
+			"triaxis":    t.Triaxis,
+			"robots":     t.Robots,
+			"users":      t.Users,
+			"updated_at": time.Now(),
 		},
 	)
 	if db.Error != nil {
@@ -76,9 +75,9 @@ func DeleteTariff(uid uint64) (int64, error) {
 	return db.RowsAffected, nil
 }
 
-// tariffsList is a ...
+// TariffsList is a ...
 func TariffsList(relations ...string) *[]Tariff {
-	db := config.DB
+	db := config.DB.Order("ID asc")
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}

@@ -11,11 +11,11 @@ type requestLicense struct {
 
 // ResponseData is a ...
 type ResponseData struct {
-	Status int    `json:"status"`
-	Msg    string `json:"msg"`
+	Status int         `json:"status"`
+	Msg    interface{} `json:"msg"`
 }
 
-func respondJSON(g *gin.Context, status int, msg string) {
+func respondJSON(g *gin.Context, status int, msg interface{}) {
 	res := &ResponseData{
 		Status: status,
 		Msg:    msg,

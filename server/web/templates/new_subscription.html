@@ -1,45 +1,55 @@
 {{define "new_subscription.html"}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="Add a new subscription to SiMPLE for the selected client">
+		<title>{{ .title }}</title>
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<link rel="icon" href="/assets/images/icon.svg" />
+	</head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ .title }}</title>
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="icon" href="/assets/images/icon.svg">
-</head>
-
-<body>
-    <main class="wrapper">
-        {{template "_header.html"}}
-        <section class="login">
-            <h3 class="title">{{.title}}</h3>
-            <div id="subscription_result"></div>
-            <form method="post" id="subscription_form" action="">
-                <input type="text" placeholder="Stripe ID" name="stripe_id">
-                <label>Select a plan: </label>
-                <select placeholder="Tariff ID" name="tariff_id">
-                    {{range $key, $value := .Tariffs}}
-                      <option value="{{ $value.ID }}">{{ $value.Name }}</option>
-                    {{end}}              
-                  </select>
-                <label>
-                    <input type="checkbox" placeholder="Status" name="status">
-                    Active
-                </label>
-                <input class="button-primary" type="submit" id="create_subscription_{{.customerID}}" value="Submit">
-                <input class="button" type="button" id="cancel_subscription" onclick="history.back()" value="Cancel" />
-            </form>
-        </section>
-    </main>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/assets/js/main.js"  async defer></script>
-    <script src="/assets/js/subscriptions.js" async defer></script>
-</body>
-
+	<body>
+		<main class="wrapper">
+			{{template "_header.html"}}
+			<section class="login">
+				<h3 class="title">{{.title}}</h3>
+				<div id="subscription_result"></div>
+				<form method="post" id="subscription_form" action="">
+					<input type="text" placeholder="Stripe ID" name="stripe_id" />
+					<label>Select a plan: </label>
+					<select placeholder="Tariff ID" name="tariff_id">
+						{{range $key, $value := .Tariffs}}
+						<option value="{{ $value.ID }}">{{ $value.Name }}</option>
+						{{end}}
+					</select>
+					<label>
+						<input type="checkbox" placeholder="Status" name="status" />
+						Active
+					</label>
+					<input
+						class="button-primary"
+						type="submit"
+						id="create_subscription_{{.customerID}}"
+						value="Submit"
+					/>
+					<input
+						class="button"
+						type="button"
+						id="cancel_subscription"
+						onclick="history.back()"
+						value="Cancel"
+					/>
+				</form>
+			</section>
+		</main>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="/assets/js/main.js" async defer></script>
+		<script src="/assets/js/subscriptions.js" async defer></script>
+	</body>
 </html>
 {{end}}

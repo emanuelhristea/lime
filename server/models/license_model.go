@@ -16,7 +16,6 @@ type License struct {
 	Status         bool         `gorm:"false" json:"status"`
 	CreatedAt      time.Time    `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt      time.Time    `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt      *time.Time   `sql:"index" json:"deleted_at"`
 	Subscription   Subscription `json:"subscription"`
 }
 
@@ -60,7 +59,7 @@ func (l *License) UpdateLicense(uid uint64) (*License, error) {
 			"subscription_id": l.SubscriptionID,
 			"license":         l.License,
 			"status":          l.Status,
-			"update_at":       time.Now(),
+			"updated_at":      time.Now(),
 		},
 	)
 	if db.Error != nil {
@@ -101,6 +100,21 @@ func DeactivateLicenseBySubID(uid uint64) error {
 func LicensesListBySubscriptionID(uid uint64) *[]License {
 	licenses := []License{}
 	db := config.DB.Where("subscription_id = ?", uid).Order("created_at DESC").Find(&licenses)
+	if db.Error != nil {
+		return &licenses
+	}
+	return &licenses
+}
+
+// SubscriptionsList is a ...
+func LicensesList(subscriptionID string, relations ...string) *[]License {
+	db := config.DB
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
+	licenses := []License{}
+	db = db.Find(&licenses).Where("subscription_id=?", subscriptionID)
 	if db.Error != nil {
 		return &licenses
 	}

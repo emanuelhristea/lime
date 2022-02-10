@@ -27,11 +27,27 @@ func MainHandler(c *gin.Context) {
 		})
 	} else {
 		action := c.Param("action")
-
 		switch action {
 		case "/new":
 			c.HTML(http.StatusOK, "new_customer.html", gin.H{
 				"title": "Create new customer",
+			})
+
+		case "/update":
+			cID := c.Param("id")
+			customerID, err := strconv.ParseUint(cID, 10, 64)
+			if err != nil {
+				c.Redirect(http.StatusFound, "/admin/")
+			}
+			customer := &models.Customer{}
+			customer, err = customer.FindCustomerByID(customerID)
+			if err != nil {
+				c.Redirect(http.StatusNotFound, "/admin/")
+			}
+
+			c.HTML(http.StatusOK, "new_customer.html", gin.H{
+				"title":    "Update customer",
+				"Customer": customer,
 			})
 		default:
 			log.Print("serve main")
@@ -67,8 +83,6 @@ func CustomerSubscriptionAction(c *gin.Context) {
 func CustomerSubscriptionLicenseAction(c *gin.Context) {
 	cID := c.Param("id")
 	sID := c.Param("sid")
-	log.Print(cID)
-	log.Print(sID)
 	action := c.Param("action")
 
 	customerID, err := strconv.ParseUint(cID, 10, 64)
@@ -111,7 +125,7 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 		hash := md5.Sum([]byte(encoded))
 		licenseHash := hex.EncodeToString(hash[:])
 
-		models.DeactivateLicenseBySubID(subscriptionID)
+		// models.DeactivateLicenseBySubID(subscriptionID)
 		key := &models.License{
 			SubscriptionID: subscriptionID,
 			License:        encoded,
@@ -238,6 +252,7 @@ func DownloadLicense(c *gin.Context) {
 	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }
 
+// TariffsList is a ...
 func TariffsList(c *gin.Context) {
 	action := c.Param("action")
 
@@ -255,6 +270,7 @@ func TariffsList(c *gin.Context) {
 	}
 }
 
+// TariffsAction is a ..
 func TariffAction(c *gin.Context) {
 	id := c.Param("id")
 	action := c.Param("action")
@@ -270,6 +286,21 @@ func TariffAction(c *gin.Context) {
 		c.HTML(http.StatusOK, "tariffs.html", gin.H{
 			"title":   "Pricing",
 			"Tariffs": tariffsList,
+		})
+	case "/update":
+		tariffId, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/tariffs")
+		}
+		tariff := &models.Tariff{}
+		tariff, err = tariff.FindTariffByID(tariffId)
+		if err != nil {
+			c.Redirect(http.StatusNotFound, "/admin/tariffs")
+		}
+
+		c.HTML(http.StatusOK, "new_tariff.html", gin.H{
+			"title":  "Update customer",
+			"Tariff": tariff,
 		})
 	}
 }

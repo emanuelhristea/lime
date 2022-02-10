@@ -1,49 +1,77 @@
 {{define "new_tariff.html"}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="Create a new pricing plan">
+		<title>{{ .title }}</title>
+		<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css" />
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<link rel="icon" href="/assets/images/icon.svg" />
+	</head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ .title }}</title>
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="icon" href="/assets/images/icon.svg">
-</head>
-
-<body>
-    <main class="wrapper">
-        {{template "_header.html"}}
-        <section class="login">
-            <h3 class="title">{{.title}}</h3>
-            <div id="tariff_result"></div>
-            <form method="post" id="tariff_form" action="">
-                <input type="text" placeholder="Name" name="name">
-                <input type="number" step=0.01 placeholder="Price" name="price">
-                <label>
-                    <input type="checkbox" placeholder="Tandem" name="tandem">
-                    Tandem
-                </label>
-                <label>
-                    <input type="checkbox" placeholder="Triaxis" name="triaxis">
-                    Triaxis
-                </label>
-                <label>
-                    <input type="checkbox" placeholder="Robots" name="robots">
-                    Robots
-                </label>
-                <input type="number" min="1" max="50"  placeholder="Users" name="users">
-                <input class="button-primary" type="submit" id="create_tariff" value="Submit">
-                <input class="button" type="button" id="cancel_tariff" onclick="window.location.replace('/admin/tariffs')" value="Cancel" />
-            </form>
-        </section>
-    </main>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/assets/js/main.js"  async defer></script>
-    <script src="/assets/js/tariff.js"  async defer></script>
-</body>
-
+	<body>
+		<main class="wrapper">
+			{{template "_header.html"}}
+			<section class="login">
+				<h3 class="title">{{.title}}</h3>
+				<div id="tariff_result"></div>
+				<form method="post" id="tariff_form" action="">
+					{{if .Tariff}}
+					<input type="text" placeholder="Name" name="name" value="{{.Tariff.Name}}" />
+					<input type="number" step="0.01" placeholder="Price" name="price" value="{{.Tariff.Price | formatAsPrice}}" />
+					{{else}}
+					<input type="text" placeholder="Name" name="name" />
+					<input type="number" step="0.01" placeholder="Price" name="price" />
+					{{end}}
+					
+					<label>
+						{{if .Tariff.Tandem}}
+						<input type="checkbox" placeholder="Tandem" name="tandem" checked/>
+						{{else}}
+						<input type="checkbox" placeholder="Tandem" name="tandem" />
+						{{end}}
+						Tandem
+					</label>
+					<label>
+						{{if .Tariff.Triaxis}}
+						<input type="checkbox" placeholder="Triaxis" name="triaxis" checked/>
+						{{else}}
+						<input type="checkbox" placeholder="Triaxis" name="triaxis" />
+						{{end}}
+						Triaxis
+					</label>
+					<label>
+						{{if .Tariff.Robots}}
+						<input type="checkbox" placeholder="Robots" name="robots" checked />
+						{{else}}
+						<input type="checkbox" placeholder="Robots" name="robots" />
+						{{end}}
+						Robots
+					</label>
+					{{if .Tariff}}
+					<input type="number" min="1" max="50" placeholder="Users" name="users" value = "{{.Tariff.Users}}" />
+					<input class="button-primary" type="submit" id="update_tariff" value="Update" data-tariff-id="{{.Tariff.ID}}" />
+					{{else}}
+					<input type="number" min="1" max="50" placeholder="Users" name="users" />
+					<input class="button-primary" type="submit" id="create_tariff" value="Submit" />
+					{{end}}
+					<input
+						class="button"
+						type="button"
+						id="cancel_tariff"
+						onclick="window.location.replace('/admin/tariffs')"
+						value="Cancel"
+					/>
+				</form>
+			</section>
+		</main>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="/assets/js/main.js" async defer></script>
+		<script src="/assets/js/tariff.js" async defer></script>
+	</body>
 </html>
 {{end}}

@@ -14,7 +14,6 @@ type Customer struct {
 	Status        bool           `gorm:"false" json:"status"`
 	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt     *time.Time     `sql:"index" json:"deleted_at"`
 	Subscriptions []Subscription `json:"subscriptions"`
 }
 
@@ -69,9 +68,14 @@ func DeleteCustomer(uid uint64) (int64, error) {
 }
 
 // CustomersList is a ...
-func CustomersList() *[]Customer {
+func CustomersList(relations ...string) *[]Customer {
+	db := config.DB.Order("ID asc")
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
 	customers := []Customer{}
-	db := config.DB.Order("ID asc").Find(&customers)
+	db = db.Find(&customers)
+
 	if db.Error != nil {
 		return &customers
 	}

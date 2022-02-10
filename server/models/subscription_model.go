@@ -9,17 +9,16 @@ import (
 
 // Subscription is a ...
 type Subscription struct {
-	ID         uint64     `gorm:"primary_key;auto_increment" json:"id"`
-	StripeID   string     `gorm:"size:18;not null;unique" json:"stripe_id"`
-	CustomerID uint64     `sql:"unique_index:idx_member;type:int REFERENCES customers(id) ON DELETE CASCADE" json:"customer_id"`
-	TariffID   uint64     `sql:"unique_index:idx_member;type:int REFERENCES tariffs(id) ON DELETE CASCADE" json:"tariff_id"`
-	Status     bool       `gorm:"false" json:"status"`
-	CreatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
-	Customer   Customer   `json:"customer"`
-	Tariff     Tariff     `json:"tariff"`
-	Licenses   []License  `json:"licenses"`
+	ID         uint64    `gorm:"primary_key;auto_increment" json:"id"`
+	StripeID   string    `gorm:"size:18;not null;unique" json:"stripe_id"`
+	CustomerID uint64    `sql:"unique_index:idx_member;type:int REFERENCES customers(id) ON DELETE CASCADE" json:"customer_id"`
+	TariffID   uint64    `sql:"unique_index:idx_member;type:int REFERENCES tariffs(id) ON DELETE CASCADE" json:"tariff_id"`
+	Status     bool      `gorm:"false" json:"status"`
+	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	Customer   Customer  `json:"customer"`
+	Tariff     Tariff    `json:"tariff"`
+	Licenses   []License `json:"licenses"`
 }
 
 // SaveSubscription is a ...
@@ -32,8 +31,13 @@ func (s *Subscription) SaveSubscription() (*Subscription, error) {
 }
 
 // FindSubscriptionByID is a ...
-func (s *Subscription) FindSubscriptionByID(uid uint64) (*Subscription, error) {
-	err := config.DB.Model(Subscription{}).Where("id = ?", uid).Take(&s).Error
+func (s *Subscription) FindSubscriptionByID(uid uint64, relations ...string) (*Subscription, error) {
+	db := config.DB.Model(Subscription{})
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
+	err := db.Where("id = ?", uid).Take(&s).Error
 	if err != nil {
 		return &Subscription{}, err
 	}
@@ -63,7 +67,7 @@ func (s *Subscription) UpdateSubscription(uid uint64) (*Subscription, error) {
 			"stripe_id":   s.StripeID,
 			"tariff_id":   s.TariffID,
 			"status":      s.Status,
-			"update_at":   time.Now(),
+			"updated_at":  time.Now(),
 		},
 	)
 	if db.Error != nil {
@@ -107,4 +111,19 @@ func SubscriptionsByCustomerID(customerID string) *[]CustomerSubscriptionsList {
 		return &result
 	}
 	return &result
+}
+
+// SubscriptionsList is a ...
+func SubscriptionsList(customerID string, relations ...string) *[]Subscription {
+	db := config.DB
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
+	subscriptions := []Subscription{}
+	db = db.Find(&subscriptions).Where("customer_id=?", customerID)
+	if db.Error != nil {
+		return &subscriptions
+	}
+	return &subscriptions
 }

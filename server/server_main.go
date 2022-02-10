@@ -37,7 +37,6 @@ func setupRouter() *gin.Engine {
 	r.Static("/assets", "./server/web/assets")
 	r.SetFuncMap(template.FuncMap{
 		"formatAsPrice": formatAsPrice,
-		"formatAsCheck": formatAsCheck,
 		"formatAsDate":  formatAsDate,
 		"columnStatus":  columnStatus,
 		"bytesToString": keyBytesToString,
@@ -56,15 +55,26 @@ func setupRouter() *gin.Engine {
 		api.GET("/tariffs", controllers.GetTariffList)
 		api.GET("/tariff/:id", controllers.GetTariff)
 		api.POST("/tariff", controllers.CreateTariff)
+		api.PATCH("/tariff/:id", controllers.UpdateTariff)
 		api.DELETE("/tariff/:id", controllers.DeleteTariff)
 
+		api.GET("/customers", controllers.GetCustomerList)
+		api.GET("/customer/:id", controllers.GetCustomer)
 		api.POST("/customer", controllers.CreateCustomer)
 		api.PATCH("/customer/:id", controllers.UpdateCustomer)
 		api.DELETE("/customer/:id", controllers.DeleteCustomer)
 
+		api.GET("/subscriptions/:customerId", controllers.GetSubscriptionList)
+		api.GET("/subscription/:id", controllers.GetSubscription)
 		api.POST("/customer/:id/subscription", controllers.CreateSubscription)
-		api.PATCH("/customer/:id/subscription/:id", controllers.UpdateSubscription)
-		api.DELETE("/customer/:id/subscription/:id", controllers.DeleteSubscription)
+		api.PATCH("/customer/:id/subscription/:sid", controllers.UpdateSubscription)
+		api.DELETE("/customer/:id/subscription/:sid", controllers.DeleteSubscription)
+
+		api.GET("/licenses/:subscripionId", controllers.GetLicensesList)
+		api.GET("/license/:id", controllers.GetLicense)
+		api.POST("/license", controllers.CreateLicense)
+		api.PATCH("/license/:id", controllers.UpdateLicense)
+		api.DELETE("/license/:id", controllers.DeleteLicense)
 	}
 
 	admin := r.Group("/admin")
@@ -74,11 +84,16 @@ func setupRouter() *gin.Engine {
 	admin.Use(middleware.AuthRequired)
 	{
 		admin.GET("/license/:id", controllers.DownloadLicense)
+
 		admin.GET("/customer/:id/subscription/*action", controllers.CustomerSubscriptionAction)
 		admin.GET("/customer/:id/subscriptions/*action", controllers.CustomerSubscriptionList)
 		admin.GET("/customer/:id/sub/:sid/license/*action", controllers.CustomerSubscriptionLicenseAction)
+
 		admin.GET("/tariffs/*action", controllers.TariffsList)
+		admin.GET("/tariff/:id/edit/*action", controllers.TariffAction)
+
 		admin.GET("/customers/*action", controllers.MainHandler)
+		admin.GET("/customer/:id/edit/*action", controllers.MainHandler)
 	}
 
 	return r

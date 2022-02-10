@@ -1,39 +1,84 @@
 {{define "new_customer.html"}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="Add a new customer using their purchase id for licensee key generation"
+		/>
+		<title>{{ .title }}</title>
+		<link
+			rel="stylesheet"
+			href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
+		/>
+		<link
+			rel="stylesheet"
+			href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css"
+		/>
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<link rel="icon" href="/assets/images/icon.svg" />
+	</head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ .title }}</title>
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="icon" href="/assets/images/icon.svg">
-</head>
+	<body>
+		<main class="wrapper">
+			{{template "_header.html"}}
+			<section class="login">
+				<h3 class="title">{{.title}}</h3>
+				<div id="customer_result"></div>
+				<form method="post" id="customer_form" action="">
+					{{if .Customer}}
+					<input type="text" placeholder="Name" name="name" value="{{.Customer.Name}}" />
+					{{else}}
+					<input type="text" placeholder="Name" name="name" />
+					{{end}}
+					<label>
+						{{if .Customer.Status}}
+						<input
+							type="checkbox"
+							placeholder="Status"
+							name="status"
+							checked
+						/>
+						{{else}}
+						<input type="checkbox" placeholder="Status" name="status" />
+						{{end}} Active
+					</label>
+					{{if .Customer}}
+					<input
+						class="button-primary"
+						data-customer-id="{{.Customer.ID}}"
+						type="submit"
+						id="update_customer"
+						value="Update"
+					/>
+					{{else}}
+					<input
+						class="button-primary"
+						type="submit"
+						id="create_customer"
+						value="Submit"
+					/>
+					{{end}}
 
-<body>
-    <main class="wrapper">
-        {{template "_header.html"}}
-        <section class="login">
-            <h3 class="title">{{.title}}</h3>
-            <div id="customer_result"></div>
-            <form method="post" id="customer_form" action="">
-                <input type="text" placeholder="Name" name="name">
-                <label>
-                    <input type="checkbox" placeholder="Status" name="status">
-                    Active
-                </label>              
-                <input class="button-primary" type="submit" id="create_customer" value="Submit">
-                <input class="button" type="button" id="cancel_customer" onclick="window.location.replace('/admin/customers/')" value="Cancel" />
-            </form>
-        </section>
-    </main>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/assets/js/main.js"  async defer></script>
-    <script src="/assets/js/customers.js"  async defer></script>
-</body>
-
+					<input
+						class="button"
+						type="button"
+						id="cancel_customer"
+						onclick="window.location.replace('/admin/customers/')"
+						value="Cancel"
+					/>
+				</form>
+			</section>
+		</main>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+		<script src="/assets/js/main.js" async defer></script>
+		<script src="/assets/js/customers.js" async defer></script>
+	</body>
 </html>
 {{end}}
