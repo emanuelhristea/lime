@@ -46,7 +46,7 @@ func extractSubscriptionFromForm(c *gin.Context) (*models.Subscription, bool) {
 		return nil, true
 	}
 
-	tariff, err := strconv.ParseUint(c.PostForm("tariff_id"), 10, 64)
+	tariffId, err := strconv.ParseUint(c.PostForm("tariff_id"), 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Invalid plan selected")
 		return nil, true
@@ -66,7 +66,7 @@ func extractSubscriptionFromForm(c *gin.Context) (*models.Subscription, bool) {
 
 	modelSubscription := &models.Subscription{
 		StripeID:   stripe,
-		TariffID:   tariff,
+		TariffID:   tariffId,
 		CustomerID: customerId,
 		Status:     status,
 	}

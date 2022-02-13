@@ -11,6 +11,7 @@ import (
 type Customer struct {
 	ID            uint64         `gorm:"primary_key;auto_increment" json:"id"`
 	Name          string         `gorm:"size:255;not null;unique" json:"name"`
+	Email         string         `gorm:"size:255;not null;unique" json:"email"`
 	Status        bool           `gorm:"false" json:"status"`
 	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
@@ -69,7 +70,7 @@ func DeleteCustomer(uid uint64) (int64, error) {
 
 // CustomersList is a ...
 func CustomersList(relations ...string) *[]Customer {
-	db := config.DB.Order("ID asc")
+	db := config.DB.Model(&Customer{}).Order("ID asc")
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}

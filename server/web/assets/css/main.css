@@ -4,7 +4,7 @@
 }
 
 .wrapper .container {
-	max-width: 80rem;
+	max-width: 120rem;
 }
 
 .carbonads {
@@ -14,7 +14,7 @@
 	line-height: 1.6;
 	margin: 0 auto;
 	margin-bottom: 2rem;
-	max-width: 33rem;
+	max-width: 53rem;
 	padding: 1.5rem;
 }
 
@@ -27,7 +27,7 @@
 .login {
 	margin: 0 auto;
 	margin-top: 10rem;
-	max-width: 33rem;
+	max-width: 53rem;
 	padding: 1.5rem;
 }
 

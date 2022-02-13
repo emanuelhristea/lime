@@ -8,7 +8,7 @@ $(document).ready(function () {
 				location.reload();
 			},
 			error: function () {
-				$("#result_form").html("<p>Incorrect login or password</p>");
+				$("#result_form").html("<p><b>Incorrect username or password</b></p>");
 			},
 		});
 		return false;

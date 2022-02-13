@@ -32,12 +32,12 @@ func (s *Subscription) SaveSubscription() (*Subscription, error) {
 
 // FindSubscriptionByID is a ...
 func (s *Subscription) FindSubscriptionByID(uid uint64, relations ...string) (*Subscription, error) {
-	db := config.DB.Model(Subscription{})
+	db := config.DB.Model(Subscription{}).Where("id = ?", uid)
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}
 
-	err := db.Where("id = ?", uid).Take(&s).Error
+	err := db.Take(&s).Error
 	if err != nil {
 		return &Subscription{}, err
 	}
@@ -48,8 +48,13 @@ func (s *Subscription) FindSubscriptionByID(uid uint64, relations ...string) (*S
 }
 
 // FindSubscriptionByStripeID is a ...
-func (s *Subscription) FindSubscriptionByStripeID(stripeID string) (*Subscription, error) {
-	err := config.DB.Model(Subscription{}).Where("stripe_id = ? AND status = ?", stripeID, true).Take(&s).Error
+func (s *Subscription) FindSubscriptionByStripeID(stripeID string, relations ...string) (*Subscription, error) {
+	db := config.DB.Model(Subscription{}).Where("stripe_id = ? AND status = ?", stripeID, true)
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
+	err := db.Take(&s).Error
 	if err != nil {
 		return &Subscription{}, err
 	}
@@ -115,13 +120,13 @@ func SubscriptionsByCustomerID(customerID string) *[]CustomerSubscriptionsList {
 
 // SubscriptionsList is a ...
 func SubscriptionsList(customerID string, relations ...string) *[]Subscription {
-	db := config.DB
+	db := config.DB.Model(&Subscription{}).Order("ID asc").Where("customer_id=?", customerID)
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}
 
 	subscriptions := []Subscription{}
-	db = db.Find(&subscriptions).Where("customer_id=?", customerID)
+	db = db.Find(&subscriptions)
 	if db.Error != nil {
 		return &subscriptions
 	}

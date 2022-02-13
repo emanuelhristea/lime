@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -47,51 +46,45 @@ func GetLicense(c *gin.Context) {
 	respondJSON(c, http.StatusOK, _license)
 }
 
-func CreateLicense(c *gin.Context) {
-	modelSubscription, shouldReturn := extractSubscriptionFromForm(c)
-	if shouldReturn {
-		return
-	}
-
-	_subscription, err := modelSubscription.SaveSubscription()
-	if err != nil {
-		respondJSON(c, http.StatusBadRequest, "Cannot save subscription. Duplicate payment id or plan")
-		return
-	}
-
-	respondJSON(c, http.StatusOK, _subscription)
-}
-
 func UpdateLicense(c *gin.Context) {
-	sId := c.Param("sid")
-	subscriptionId, err := strconv.ParseUint(sId, 10, 64)
-	if err != nil {
-		respondJSON(c, http.StatusNotFound, err.Error())
-		return
-	}
-	modelSubscription, shouldReturn := extractSubscriptionFromForm(c)
-	if shouldReturn {
-		return
-	}
-
-	_subscription, err := modelSubscription.UpdateSubscription(subscriptionId)
+	id := c.Param("id")
+	licenseId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	respondJSON(c, http.StatusOK, _subscription)
+	_license := &models.License{}
+	_license, err = _license.FindLicenseByID(licenseId)
+
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	status := false
+	if c.PostForm("status") != "" {
+		status = true
+	}
+
+	err = models.SetLicenseStatusByID(licenseId, status)
+	if err != nil {
+		respondJSON(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(c, http.StatusOK, _license)
 }
 
 func DeleteLicense(c *gin.Context) {
-	sId := c.Param("sid")
-	subscriptionId, err := strconv.ParseUint(sId, 10, 64)
+	id := c.Param("id")
+	licenseId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	rows, err := models.DeleteSubscription(subscriptionId)
+	rows, err := models.DeleteLicense(licenseId)
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Cannot delete customer that has active subscriptions")
 		return
@@ -113,25 +106,28 @@ func VerifyKey(c *gin.Context) {
 	c.BindJSON(&request)
 
 	licenseKey, err := base64.StdEncoding.DecodeString(request.License)
-	log.Print(licenseKey)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	_license, err := modelLicense.FindLicense(licenseKey)
-	log.Print(_license)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
-		return
-	}
-	if _license.ID == 0 {
-		respondJSON(c, http.StatusNotFound, "License not found!")
 		return
 	}
 
 	l, err := license.Decode([]byte(licenseKey), license.GetPublicKey())
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	if l.Expired() {
+		models.SetLicenseStatusBySubID(_license.ID, false)
+	}
+
+	if !_license.Status {
+		respondJSON(c, http.StatusNotFound, "License expired!")
 		return
 	}
 
@@ -151,59 +147,73 @@ func VerifyKey(c *gin.Context) {
 func CreateKey(c *gin.Context) {
 	month := time.Hour * 24 * 31
 	modelSubscription := models.Subscription{}
-	modelTariff := models.Tariff{}
-	modelCustomer := models.Customer{}
 
 	request := &requestLicense{}
 	c.BindJSON(&request)
 
-	_subscription, err := modelSubscription.FindSubscriptionByStripeID(request.StripeID)
+	_subscription, err := modelSubscription.FindSubscriptionByStripeID(request.StripeID, "Customer", "Tariff", "Licenses")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
+
 	if _subscription.ID == 0 {
 		respondJSON(c, http.StatusNotFound, "Customers not found!")
 		return
 	}
 
-	_customer, _ := modelCustomer.FindCustomerByID(_subscription.CustomerID)
-
-	_tariff, err := modelTariff.FindTariffByID(_subscription.TariffID)
-	if err != nil {
-		respondJSON(c, http.StatusNotFound, err.Error())
+	encoded, response := addLicenseToSubscription(_subscription, month)
+	if response != "" {
+		respondJSON(c, http.StatusMethodNotAllowed, response)
 		return
 	}
-	if _tariff.ID == 0 {
-		respondJSON(c, http.StatusNotFound, "Tariff not found!")
-		return
+
+	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
+}
+
+func numberOfActiveLicenses(_subscription *models.Subscription) int {
+	num := 0
+	for _, lic := range _subscription.Licenses {
+		l, err := license.Decode([]byte(lic.License), license.GetPublicKey())
+		if err != nil || !lic.Status || l.Expired() {
+			continue
+		}
+		num++
+	}
+	return num
+}
+
+func addLicenseToSubscription(_subscription *models.Subscription, expiry time.Duration) ([]byte, string) {
+	if !_subscription.Customer.Status || !_subscription.Status {
+		return nil, "Your subscription was deactivated!"
+	}
+	if numberOfActiveLicenses(_subscription) >= _subscription.Tariff.Users {
+		return nil, "Your have reached the maximum number of users for your subscription!"
 	}
 
 	limit := license.Limits{
-		Tandem:  _tariff.Tandem,
-		Triaxis: _tariff.Triaxis,
-		Robots:  _tariff.Robots,
-		Users:   _tariff.Users,
+		Tandem:  _subscription.Tariff.Tandem,
+		Triaxis: _subscription.Tariff.Triaxis,
+		Robots:  _subscription.Tariff.Robots,
+		Users:   _subscription.Tariff.Users,
 	}
+
 	metadata := []byte(`{"message": "test message"}`)
 	_license := &license.License{
-		Iss: _customer.Name,
+		Iss: _subscription.Customer.Name,
 		Cus: _subscription.StripeID,
 		Sub: _subscription.TariffID,
-		Typ: _tariff.Name,
+		Typ: _subscription.Tariff.Name,
 		Lim: limit,
 		Dat: metadata,
-		Exp: time.Now().UTC().Add(month),
+		Exp: time.Now().UTC().Add(expiry),
 		Iat: time.Now().UTC(),
 	}
 
 	encoded, err := _license.Encode(license.GetPrivateKey())
 	if err != nil {
-		respondJSON(c, http.StatusNotFound, err.Error())
-		return
+		return nil, err.Error()
 	}
-
-	models.DeactivateLicenseBySubID(_subscription.ID)
 
 	hash := md5.Sum([]byte(encoded))
 	licenseHash := hex.EncodeToString(hash[:])
@@ -217,11 +227,9 @@ func CreateKey(c *gin.Context) {
 
 	_, err = key.SaveLicense()
 	if err != nil {
-		respondJSON(c, http.StatusNotFound, err.Error())
-		return
+		return nil, err.Error()
 	}
-
-	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
+	return encoded, ""
 }
 
 // GetKey is a ...
@@ -232,6 +240,11 @@ func CreateKey(c *gin.Context) {
 // @Router /key/:customer_id [get]
 func GetKey(c *gin.Context) {
 	respondJSON(c, http.StatusOK, "GetKey")
+}
+
+// GetUserSubscriptions is a ...
+func GetUserSubscriptions(c *gin.Context) {
+
 }
 
 // UpdateKey is a ...

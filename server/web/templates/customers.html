@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="Manage SiMPLE clients and their roles">
+		<meta name="description" content="Manage SiMPLE clients and their roles" />
 		<title>{{ .title }}</title>
 		<link
 			rel="stylesheet"
@@ -22,17 +22,18 @@
 		<link rel="icon" href="/assets/images/icon.svg" />
 	</head>
 
-	<body>
+	<body id="customers_body">
 		<main class="wrapper">
 			{{template "_header.html"}}
 			<section class="container">
 				<h3>{{ .title }}</h3>
 				<div id="customers_result"></div>
-				<table>
+				<table id="customers_table">
 					<thead>
 						<tr>
 							<th></th>
 							<th>Name</th>
+							<th>Email</th>
 							<th>Created at</th>
 							<th>Updated at</th>
 							<th>Actions</th>
@@ -40,52 +41,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{{ range $i,$value := .customers}}
-						<tr>
-							<td>
-								<a href="/admin/customer/{{$value.ID}}/subscriptions/"
-									>{{$value.ID}}</a
-								>
-							</td>
-							<td>
-								<a href="/admin/customer/{{$value.ID}}/subscriptions/"
-									>{{$value.Name}}</a
-								>
-							</td>
-							<td>{{$value.CreatedAt | formatAsDate}}</td>
-							<td>{{$value.UpdatedAt | formatAsDate}}</td>
-							<td style="text-align: center; vertical-align: middle">
-								{{$prefix:="Enable"}} {{if $value.Status}} {{$prefix ="Disable"}}
-								{{end}}
-								<a
-									id="toggle_customer_{{$value.ID}}"
-									data-customer="{{$value.Name}}"
-									data-status="{{$value.Status}}"
-									href="#"
-									title="{{$prefix}} customer {{$value.Name}}"
-								>
-									{{if $value.Status}}
-									<b>&#10006;</b>
-									{{else}}
-									<b>&#10004;</b>
-									{{end}}</a
-								>
-								<span>&nbsp;</span>
-								<a
-									href="/admin/customer/{{$value.ID}}/edit/update"
-									title="Edit {{$value.Name}}"
-									><b>&#x270E;</b></a
-								>
-								<span>&nbsp;</span>
-								<a
-									id="delete_customer_{{$value.ID}}"
-									href="#"
-									title="Delete {{$value.Name}}"
-									><b>&#x1F5D1;</b></a
-								>
-							</td>
-							<td>{{$value.Status | columnStatus}}</td>
-						</tr>
+						{{ range $i,$value := .customers}} {{template "_customer_row.html" $value}}
 						{{end}}
 
 						<tr>

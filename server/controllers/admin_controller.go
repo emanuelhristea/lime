@@ -1,15 +1,13 @@
 package controllers
 
 import (
-	"crypto/md5"
-	"encoding/hex"
+	"encoding/base64"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/emanuelhristea/lime/license"
 	"github.com/emanuelhristea/lime/server/middleware"
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/contrib/sessions"
@@ -34,21 +32,13 @@ func MainHandler(c *gin.Context) {
 			})
 
 		case "/update":
-			cID := c.Param("id")
-			customerID, err := strconv.ParseUint(cID, 10, 64)
-			if err != nil {
-				c.Redirect(http.StatusFound, "/admin/")
+			customer, err := customerFromParam(c)
+			if err == nil {
+				c.HTML(http.StatusOK, "new_customer.html", gin.H{
+					"title":    "Update customer",
+					"Customer": customer,
+				})
 			}
-			customer := &models.Customer{}
-			customer, err = customer.FindCustomerByID(customerID)
-			if err != nil {
-				c.Redirect(http.StatusNotFound, "/admin/")
-			}
-
-			c.HTML(http.StatusOK, "new_customer.html", gin.H{
-				"title":    "Update customer",
-				"Customer": customer,
-			})
 		default:
 			log.Print("serve main")
 			customersList := models.CustomersList()
@@ -57,6 +47,27 @@ func MainHandler(c *gin.Context) {
 				"customers": customersList,
 			})
 		}
+	}
+}
+
+func customerFromParam(c *gin.Context) (*models.Customer, error) {
+	cID := c.Param("id")
+	customerID, err := strconv.ParseUint(cID, 10, 64)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/admin/")
+	}
+	customer := &models.Customer{}
+	customer, err = customer.FindCustomerByID(customerID)
+	if err != nil {
+		c.Redirect(http.StatusNotFound, "/admin/")
+	}
+	return customer, err
+}
+
+func CustomerRowHandler(c *gin.Context) {
+	customer, err := customerFromParam(c)
+	if err == nil {
+		c.HTML(http.StatusOK, "_customer_row.html", customer)
 	}
 }
 
@@ -85,55 +96,35 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 	sID := c.Param("sid")
 	action := c.Param("action")
 
-	customerID, err := strconv.ParseUint(cID, 10, 64)
-	subscriptionID, err2 := strconv.ParseUint(sID, 10, 64)
-	if err != nil || err2 != nil {
+	subscriptionID, err := strconv.ParseUint(sID, 10, 64)
+	if err != nil {
 		c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
+		return
 	}
 
 	switch action {
 	case "/":
 	case "/new":
 		month := time.Hour * 24 * 31
-		modelTariff := models.Tariff{}
 		modelSubscription := models.Subscription{}
-		modelCustomer := models.Customer{}
 
-		_subscription, _ := modelSubscription.FindSubscriptionByID(subscriptionID)
-		_tariff, _ := modelTariff.FindTariffByID(_subscription.TariffID)
-		_customer, _ := modelCustomer.FindCustomerByID(customerID)
-
-		limit := license.Limits{
-			Tandem:  _tariff.Tandem,
-			Triaxis: _tariff.Triaxis,
-			Robots:  _tariff.Robots,
-			Users:   _tariff.Users,
+		_subscription, err := modelSubscription.FindSubscriptionByID(subscriptionID, "Tariff", "Customer", "Licenses")
+		if err != nil {
+			return
 		}
-		metadata := []byte(`{"message": "test message"}`)
-		_license := &license.License{
-			Iss: _customer.Name,
-			Cus: _subscription.StripeID,
-			Sub: _subscription.TariffID,
-			Typ: _tariff.Name,
-			Lim: limit,
-			Dat: metadata,
-			Exp: time.Now().UTC().Add(month),
-			Iat: time.Now().UTC(),
-		}
-		encoded, _ := _license.Encode(license.GetPrivateKey())
 
-		hash := md5.Sum([]byte(encoded))
-		licenseHash := hex.EncodeToString(hash[:])
-
-		// models.DeactivateLicenseBySubID(subscriptionID)
-		key := &models.License{
-			SubscriptionID: subscriptionID,
-			License:        encoded,
-			Hash:           licenseHash,
-			Status:         true,
+		_, response := addLicenseToSubscription(_subscription, month)
+		if response != "" {
+			name := CustomerNameFromID(cID)
+			subscriptionsList := models.SubscriptionsList(cID, "Licenses", "Customer", "Tariff")
+			c.HTML(http.StatusOK, "subscriptions.html", gin.H{
+				"error":         response,
+				"title":         "Subscription and Licenses for " + name,
+				"customerID":    cID,
+				"Subscriptions": subscriptionsList,
+			})
+			return
 		}
-		log.Print(key)
-		key.SaveLicense()
 
 		c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
 
@@ -143,76 +134,22 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 // CustomerSubscriptionList is a ...
 func CustomerSubscriptionList(c *gin.Context) {
 	customerID := c.Param("id")
-	sID := c.Param("sid")
-
-	subscriptionsList := models.SubscriptionsByCustomerID(customerID)
-
-	subscriptionID, err := strconv.ParseUint(sID, 10, 32)
-	if err != nil {
-		subscriptionID = 0
-		if len(*subscriptionsList) > 0 {
-			subscriptionID = uint64((*subscriptionsList)[0].ID)
-		}
-	}
+	name := CustomerNameFromID(customerID)
+	subscriptionsList := models.SubscriptionsList(customerID, "Licenses", "Customer", "Tariff")
 
 	action := c.Param("action")
-
-	licensesList := models.LicensesListBySubscriptionID(subscriptionID)
 
 	switch action {
 	case "/":
 	case "/new":
-
-		if len(*subscriptionsList) > 0 {
-			month := time.Hour * 24 * 31
-			modelTariff := models.Tariff{}
-
-			_tariff, _ := modelTariff.FindTariffByID((*subscriptionsList)[0].ID)
-
-			limit := license.Limits{
-				Tandem:  _tariff.Tandem,
-				Triaxis: _tariff.Triaxis,
-				Robots:  _tariff.Robots,
-				Users:   _tariff.Users,
-			}
-			metadata := []byte(`{"message": "test message"}`)
-			_license := &license.License{
-				Iss: (*subscriptionsList)[0].CustomerName,
-				Cus: (*subscriptionsList)[0].StripeID,
-				Sub: (*subscriptionsList)[0].TariffID,
-				Typ: _tariff.Name,
-				Lim: limit,
-				Dat: metadata,
-				Exp: time.Now().UTC().Add(month),
-				Iat: time.Now().UTC(),
-			}
-			encoded, _ := _license.Encode(license.GetPrivateKey())
-
-			hash := md5.Sum([]byte(encoded))
-			licenseHash := hex.EncodeToString(hash[:])
-
-			models.DeactivateLicenseBySubID((*subscriptionsList)[0].ID)
-			key := &models.License{
-				SubscriptionID: subscriptionID,
-				License:        encoded,
-				Hash:           licenseHash,
-				Status:         true,
-			}
-			key.SaveLicense()
-
-			c.Redirect(http.StatusFound, "/admin/customer/"+customerID+"/subscriptions/")
-		}
 	default:
 		c.Redirect(http.StatusFound, "/admin/customer/"+customerID+"/subscriptions/")
 	}
-
-	name := CustomerNameFromID(customerID)
 
 	c.HTML(http.StatusOK, "subscriptions.html", gin.H{
 		"title":         "Subscription and Licenses for " + name,
 		"customerID":    customerID,
 		"Subscriptions": subscriptionsList,
-		"Licenses":      licensesList,
 	})
 
 }
@@ -244,7 +181,7 @@ func DownloadLicense(c *gin.Context) {
 
 	license.FindLicenseByID(uid)
 
-	body := string(license.License)
+	body := base64.StdEncoding.EncodeToString(license.License)
 	reader := strings.NewReader(body)
 	contentLength := int64(len(body))
 	contentType := "application/octet-stream"

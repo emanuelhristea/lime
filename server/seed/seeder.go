@@ -38,11 +38,13 @@ var customers = []models.Customer{
 	{
 		ID:     1,
 		Name:   "Andrei Oana",
+		Email:  "aoana@destaco.com",
 		Status: true,
 	},
 	{
 		ID:     2,
 		Name:   "Emanuel Hristea",
+		Email:  "c-ehristea@destaco.com",
 		Status: true,
 	},
 }

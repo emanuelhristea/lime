@@ -9,6 +9,10 @@ type requestLicense struct {
 	License  string `json:"license"`
 }
 
+type requestSubscriptions struct {
+	Email string `json:"email"`
+}
+
 // ResponseData is a ...
 type ResponseData struct {
 	Status int         `json:"status"`

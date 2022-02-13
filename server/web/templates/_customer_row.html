@@ -1,0 +1,36 @@
+{{define "_customer_row.html"}}
+<tr id="customer_row_{{.ID}}">
+	<td>
+		<a href="/admin/customer/{{.ID}}/subscriptions/">{{.ID}}</a>
+	</td>
+	<td>
+		<a href="/admin/customer/{{.ID}}/subscriptions/">{{.Name}}</a>
+	</td>
+	<td>{{.Email}}</td>
+	<td>{{.CreatedAt | formatAsDate}}</td>
+	<td>{{.UpdatedAt | formatAsDate}}</td>
+	<td style="text-align: center; vertical-align: middle">
+		{{$prefix:="Enable"}} {{if .Status}} {{$prefix ="Disable"}} {{end}}
+
+		<a
+			id="toggle_customer_{{.ID}}"
+			data-customer="{{.Name}}"
+			data-status="{{.Status}}"
+			href="#"
+			title="{{$prefix}} customer {{.Name}}"
+		>
+			{{if .Status}}
+			<b>&#10006;</b>
+			{{else}}
+			<b>&#10004;</b>
+			{{end}}</a
+		>
+
+		<span>&nbsp;</span>
+		<a href="/admin/customer/{{.ID}}/edit/update" title="Edit {{.Name}}"><b>&#x270E;</b></a>
+		<span>&nbsp;</span>
+		<a id="delete_customer_{{.ID}}" href="#" title="Delete {{.Name}}"><b>&#x1F5D1;</b></a>
+	</td>
+	<td>{{.Status | columnStatus}}</td>
+</tr>
+{{end}}

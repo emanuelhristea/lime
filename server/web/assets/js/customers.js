@@ -21,6 +21,9 @@ $(document).ready(function () {
 
 	$("a[id^='delete_customer']").click(function () {
 		var id = this.id.replace("delete_customer_", "");
+		if (!confirm(`Are you sure you want to delete ${this.title.replace("Delete ", "")}?`)) {
+			return
+		}
 		$.ajax({
 			url: `/api/customer/${id}`,
 			type: "DELETE",
@@ -33,7 +36,7 @@ $(document).ready(function () {
 					typeof err.msg !== "undefined" && err.msg != null && err.msg != ""
 						? err.msg
 						: "Cannot delete customer";
-				$("#customers_result").html("<p>" + message + "</p>");
+				$("#customers_result").html("<p><b>" + message + "</p><b>");
 			},
 		});
 		return false;
@@ -70,7 +73,19 @@ $(document).ready(function () {
 				status: this.dataset.status == "true" ? "" : "on",
 			},
 			success: function () {
-				location.reload();
+				location.reload()
+				// $.ajax({
+				// 	url: `/admin/customer/${id}`,
+				// 	type: "GET",
+				// 	success: function (data, status, xhr) {
+				// 		$(`#customer_row_${id}`).html(data);
+				// 	}
+				// });
+				
+				// $(`#activate_customer_${id}`).fadeOut(500, function(){
+					
+				// 	$(`#activate_customer_${id}`).fadeIn().delay(500)
+				// })
 			},
 			error: function (xhr, status, error) {
 				var err = eval("(" + xhr.responseText + ")");
@@ -78,7 +93,7 @@ $(document).ready(function () {
 					typeof err.msg !== "undefined" && err.msg != null && err.msg != ""
 						? err.msg
 						: "Cannot update customer";
-				$("#customers_result").html("<p>" + message + "</p>");
+				$("#customers_result").html("<p><b>" + message + "</p><b>");
 			},
 		});
 		return false;

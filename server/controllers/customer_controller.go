@@ -46,6 +46,12 @@ func getCustomerFromForm(c *gin.Context) (*models.Customer, bool) {
 		return nil, true
 	}
 
+	e := c.PostForm("email")
+	if e == "" {
+		respondJSON(c, http.StatusBadRequest, "Email is invalid")
+		return nil, true
+	}
+
 	status := false
 	if c.PostForm("status") != "" {
 		status = true
@@ -53,6 +59,7 @@ func getCustomerFromForm(c *gin.Context) (*models.Customer, bool) {
 
 	modelCustomer := &models.Customer{
 		Name:   n,
+		Email:  e,
 		Status: status,
 	}
 	return modelCustomer, false
@@ -66,7 +73,7 @@ func CreateCustomer(c *gin.Context) {
 
 	_customer, err := modelCustomer.SaveCustomer()
 	if err != nil {
-		respondJSON(c, http.StatusBadRequest, "Cannot save customer, probably duplicate name")
+		respondJSON(c, http.StatusBadRequest, "Cannot save customer, duplicate name or email")
 		return
 	}
 

@@ -77,7 +77,7 @@ func DeleteTariff(uid uint64) (int64, error) {
 
 // TariffsList is a ...
 func TariffsList(relations ...string) *[]Tariff {
-	db := config.DB.Order("ID asc")
+	db := config.DB.Model(&Tariff{}).Order("ID asc")
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}

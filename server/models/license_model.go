@@ -74,7 +74,7 @@ func (l *License) UpdateLicense(uid uint64) (*License, error) {
 }
 
 // DeleteLicense is a ...
-func (l *License) DeleteLicense(uid uint64) (int64, error) {
+func DeleteLicense(uid uint64) (int64, error) {
 	db := config.DB.Model(&License{}).Where("id = ?", uid).Take(&License{}).Delete(&License{})
 	if db.Error != nil {
 		return 0, db.Error
@@ -82,11 +82,25 @@ func (l *License) DeleteLicense(uid uint64) (int64, error) {
 	return db.RowsAffected, nil
 }
 
-// DeactivateLicenseBySubID is a ...
-func DeactivateLicenseBySubID(uid uint64) error {
+// SetLicenseStatusBySubID is a ...
+func SetLicenseStatusBySubID(uid uint64, status bool) error {
 	db := config.DB.Model(&License{}).Where("subscription_id = ?", uid).UpdateColumns(
 		map[string]interface{}{
-			"status":     false,
+			"status":     status,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+// DeactivateLicenseBySubID is a ...
+func SetLicenseStatusByID(uid uint64, status bool) error {
+	db := config.DB.Model(&License{}).Where("id = ?", uid).UpdateColumns(
+		map[string]interface{}{
+			"status":     status,
 			"updated_at": time.Now(),
 		},
 	)
@@ -108,13 +122,13 @@ func LicensesListBySubscriptionID(uid uint64) *[]License {
 
 // SubscriptionsList is a ...
 func LicensesList(subscriptionID string, relations ...string) *[]License {
-	db := config.DB
+	db := config.DB.Model(&License{}).Order("id asc").Where("subscription_id=?", subscriptionID)
 	for _, rel := range relations {
 		db = db.Preload(rel)
 	}
 
 	licenses := []License{}
-	db = db.Find(&licenses).Where("subscription_id=?", subscriptionID)
+	db = db.Find(&licenses)
 	if db.Error != nil {
 		return &licenses
 	}
