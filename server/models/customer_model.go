@@ -28,8 +28,29 @@ func (c *Customer) SaveCustomer() (*Customer, error) {
 }
 
 // FindCustomerByID is a ...
-func (c *Customer) FindCustomerByID(uid uint64) (*Customer, error) {
-	err := config.DB.Model(Customer{}).Where("id = ?", uid).Take(&c).Error
+func (c *Customer) FindCustomerByID(uid uint64, relations ...string) (*Customer, error) {
+	db := config.DB.Model(Customer{}).Where("id = ?", uid)
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+
+	err := db.Take(&c).Error
+	if err != nil {
+		return &Customer{}, err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		return &Customer{}, ErrCustomerNotFound
+	}
+	return c, err
+}
+
+// FindCustomerByEmail is a ...
+func (c *Customer) FindCustomerByEmail(email string, relations ...string) (*Customer, error) {
+	db := config.DB.Model(Customer{}).Where("email = ?", email).Where("status = ?", true)
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+	err := db.Take(&c).Error
 	if err != nil {
 		return &Customer{}, err
 	}

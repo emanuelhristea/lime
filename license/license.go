@@ -36,10 +36,17 @@ type License struct {
 
 // Limits is a ...
 type Limits struct {
-	Tandem  bool `json:"tandem"`
-	Triaxis bool `json:"triaxis"`
-	Robots  bool `json:"robots"`
-	Users   int  `json:"users"`
+	Tandem  bool `json:"tandem,omitempty"`
+	Triaxis bool `json:"triaxis,omitempty"`
+	Robots  bool `json:"robots,omitempty"`
+	Users   int  `json:"users,omitempty"`
+}
+
+type Subscription struct {
+	Plan       string `json:"plan,omitempty"`        // Subscription plan
+	PurchaseID string `json:"purchase_id,omitempty"` // transaction id
+	Limits     Limits `json:"limits,omitempty"`      // License Limit (e.g. Site)
+	Used       int    `json:"used,omitempty"`        //
 }
 
 // Expired is a ...

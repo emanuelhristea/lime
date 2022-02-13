@@ -244,7 +244,34 @@ func GetKey(c *gin.Context) {
 
 // GetUserSubscriptions is a ...
 func GetUserSubscriptions(c *gin.Context) {
+	request := &requestSubscriptions{}
+	c.BindJSON(request)
+	modelCustomer := models.Customer{}
+	_customer, err := modelCustomer.FindCustomerByEmail(request.Email, "Subscriptions", "Subscriptions.Tariff", "Subscriptions.Licenses")
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+	response := []license.Subscription{}
+	for _, sub := range _customer.Subscriptions {
+		if !sub.Status {
+			continue
+		}
 
+		response = append(response, license.Subscription{
+			Plan:       sub.Tariff.Name,
+			PurchaseID: sub.StripeID,
+			Limits: license.Limits{
+				Tandem:  sub.Tariff.Tandem,
+				Triaxis: sub.Tariff.Triaxis,
+				Robots:  sub.Tariff.Robots,
+				Users:   sub.Tariff.Users,
+			},
+			Used: numberOfActiveLicenses(&sub),
+		})
+	}
+
+	respondJSON(c, http.StatusOK, response)
 }
 
 // UpdateKey is a ...
