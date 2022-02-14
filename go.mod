@@ -13,7 +13,14 @@ require (
 )
 
 require (
+	github.com/didip/tollbooth_gin v0.0.0-20170928041415-5752492be505 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+)
+
+require (
 	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff // indirect
+	github.com/didip/tollbooth v4.0.2+incompatible
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
