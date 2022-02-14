@@ -29,8 +29,12 @@ func (l *License) SaveLicense() (*License, error) {
 }
 
 // FindLicenseByID is a ...
-func (l *License) FindLicenseByID(uid uint64) (*License, error) {
-	err := config.DB.Model(License{}).Where("id = ?", uid).Take(&l).Error
+func (l *License) FindLicenseByID(uid uint64, relations ...string) (*License, error) {
+	db := config.DB.Model(License{}).Where("id = ?", uid)
+	for _, rel := range relations {
+		db = db.Preload(rel)
+	}
+	err := db.Take(&l).Error
 	if err != nil {
 		return &License{}, err
 	}

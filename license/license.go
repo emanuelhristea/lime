@@ -39,6 +39,7 @@ type Limits struct {
 	Tandem  bool `json:"tandem,omitempty"`
 	Triaxis bool `json:"triaxis,omitempty"`
 	Robots  bool `json:"robots,omitempty"`
+	Period  int  `json:"expiry,omitempty"`
 	Users   int  `json:"users,omitempty"`
 }
 

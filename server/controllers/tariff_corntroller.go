@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func GetTariffList(c *gin.Context) {
 
 	tariffsList := &[]models.Tariff{}
 	if exists {
-		tariffsList = models.TariffsList(preload)
+		tariffsList = models.TariffsList(strings.Split(preload, ",")...)
 	} else {
 		tariffsList = models.TariffsList()
 	}
@@ -82,6 +83,13 @@ func getTariffFromForm(c *gin.Context) (*models.Tariff, bool) {
 		return nil, true
 	}
 
+	e := c.PostForm("period")
+	period, err := strconv.ParseInt(e, 10, 64)
+	if err != nil || period < 1 || period > 1000 {
+		respondJSON(c, http.StatusBadRequest, "License period is invalid")
+		return nil, true
+	}
+
 	modelTariff := &models.Tariff{
 		Name:    n,
 		Price:   price,
@@ -89,6 +97,7 @@ func getTariffFromForm(c *gin.Context) (*models.Tariff, bool) {
 		Triaxis: triaxis,
 		Robots:  robots,
 		Users:   int(users),
+		Period:  int(period),
 	}
 	return modelTariff, false
 }

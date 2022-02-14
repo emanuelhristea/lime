@@ -53,9 +53,11 @@
 						Robots
 					</label>
 					{{if .Tariff}}
+					<input type="number" min="1" max="1000" placeholder="Period" name="period" value = "{{.Tariff.Period}}" />
 					<input type="number" min="1" max="50" placeholder="Users" name="users" value = "{{.Tariff.Users}}" />
 					<input class="button-primary" type="submit" id="update_tariff" value="Update" data-tariff-id="{{.Tariff.ID}}" />
 					{{else}}
+					<input type="number" min="1" max="1000" placeholder="Period" name="period" />
 					<input type="number" min="1" max="50" placeholder="Users" name="users" />
 					<input class="button-primary" type="submit" id="create_tariff" value="Submit" />
 					{{end}}
@@ -70,8 +72,8 @@
 			</section>
 		</main>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script src="/assets/js/main.js" async defer></script>
-		<script src="/assets/js/tariff.js" async defer></script>
+		<script src="/assets/js/main.js"></script>
+		<script src="/assets/js/tariff.js"></script>
 	</body>
 </html>
 {{end}}

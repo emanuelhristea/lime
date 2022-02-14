@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func GetCustomerList(c *gin.Context) {
 	preload, exists := c.GetQuery("load")
 	customerList := &[]models.Customer{}
 	if exists {
-		customerList = models.CustomersList(preload)
+		customerList = models.CustomersList(strings.Split(preload, ",")...)
 	} else {
 		customerList = models.CustomersList()
 	}
@@ -52,6 +53,12 @@ func getCustomerFromForm(c *gin.Context) (*models.Customer, bool) {
 		return nil, true
 	}
 
+	r := c.PostForm("role")
+	if r == "" {
+		respondJSON(c, http.StatusBadRequest, "Role is invalid")
+		return nil, true
+	}
+
 	status := false
 	if c.PostForm("status") != "" {
 		status = true
@@ -60,6 +67,7 @@ func getCustomerFromForm(c *gin.Context) (*models.Customer, bool) {
 	modelCustomer := &models.Customer{
 		Name:   n,
 		Email:  e,
+		Role:   models.Role(r),
 		Status: status,
 	}
 	return modelCustomer, false

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/emanuelhristea/lime/server/middleware"
 	"github.com/emanuelhristea/lime/server/models"
@@ -105,7 +104,6 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 	switch action {
 	case "/":
 	case "/new":
-		month := time.Hour * 24 * 31
 		modelSubscription := models.Subscription{}
 
 		_subscription, err := modelSubscription.FindSubscriptionByID(subscriptionID, "Tariff", "Customer", "Licenses")
@@ -113,17 +111,9 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 			return
 		}
 
-		_, response := addLicenseToSubscription(_subscription, month)
+		_, response := addLicenseToSubscription(_subscription)
 		if response != "" {
-			name := CustomerNameFromID(cID)
-			subscriptionsList := models.SubscriptionsList(cID, "Licenses", "Customer", "Tariff")
-			c.HTML(http.StatusOK, "subscriptions.html", gin.H{
-				"error":         response,
-				"title":         "Subscription and Licenses for " + name,
-				"customerID":    cID,
-				"Subscriptions": subscriptionsList,
-			})
-			return
+			c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/error?message="+response)
 		}
 
 		c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
@@ -141,17 +131,25 @@ func CustomerSubscriptionList(c *gin.Context) {
 
 	switch action {
 	case "/":
+		c.HTML(http.StatusOK, "subscriptions.html", gin.H{
+			"title":         "Subscription and Licenses for " + name,
+			"customerID":    customerID,
+			"Subscriptions": subscriptionsList,
+		})
 	case "/new":
+	case "/error":
+		message, exists := c.GetQuery("message")
+		if exists {
+			c.HTML(http.StatusOK, "subscriptions.html", gin.H{
+				"error":         message,
+				"title":         "Subscription and Licenses for " + name,
+				"customerID":    customerID,
+				"Subscriptions": subscriptionsList,
+			})
+		}
 	default:
 		c.Redirect(http.StatusFound, "/admin/customer/"+customerID+"/subscriptions/")
 	}
-
-	c.HTML(http.StatusOK, "subscriptions.html", gin.H{
-		"title":         "Subscription and Licenses for " + name,
-		"customerID":    customerID,
-		"Subscriptions": subscriptionsList,
-	})
-
 }
 
 func CustomerNameFromID(customerID string) string {

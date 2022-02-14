@@ -14,6 +14,7 @@ var tariffs = []models.Tariff{
 		Tandem:  true,
 		Triaxis: false,
 		Robots:  true,
+		Period:  30,
 		Users:   1,
 	},
 	{
@@ -22,6 +23,7 @@ var tariffs = []models.Tariff{
 		Tandem:  true,
 		Triaxis: false,
 		Robots:  false,
+		Period:  365,
 		Users:   20,
 	},
 	{
@@ -30,6 +32,7 @@ var tariffs = []models.Tariff{
 		Tandem:  false,
 		Triaxis: true,
 		Robots:  false,
+		Period:  365,
 		Users:   20,
 	},
 }
@@ -39,12 +42,14 @@ var customers = []models.Customer{
 		ID:     1,
 		Name:   "Andrei Oana",
 		Email:  "aoana@destaco.com",
+		Role:   "admin",
 		Status: true,
 	},
 	{
 		ID:     2,
 		Name:   "Emanuel Hristea",
 		Email:  "c-ehristea@destaco.com",
+		Role:   "user",
 		Status: true,
 	},
 }
@@ -66,14 +71,25 @@ var subscription = []models.Subscription{
 
 // Load import test data to database
 func Load(db *gorm.DB) {
-	// err := db.DropTableIfExists(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
-	// if err != nil {
-	// 	log.Fatalf("cannot drop table: %v", err)
-	// }
 	db.DropTableIfExists(&models.License{})
 	db.DropTableIfExists(&models.Subscription{})
 	db.DropTableIfExists(&models.Customer{})
 	db.DropTableIfExists(&models.Tariff{})
+
+	result := db.Exec("SELECT 1 FROM pg_type WHERE typname = 'role';")
+
+	switch {
+	case result.RowsAffected == 0:
+		err := db.Exec("CREATE TYPE role AS ENUM ('admin', 'user', 'guest');").Error
+		if err != nil {
+			log.Fatal("Error creating role ENUM")
+			return
+		}
+
+	case result.Error != nil:
+		log.Fatal("Error selecting role type")
+		return
+	}
 
 	err := db.AutoMigrate(&models.Tariff{}, &models.Customer{}, &models.Subscription{}, &models.License{}).Error
 

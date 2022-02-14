@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ func GetSubscriptionList(c *gin.Context) {
 	preload, exists := c.GetQuery("load")
 	subscriptionList := &[]models.Subscription{}
 	if exists {
-		subscriptionList = models.SubscriptionsList(customerId, preload)
+		subscriptionList = models.SubscriptionsList(customerId, strings.Split(preload, ",")...)
 	} else {
 		subscriptionList = models.SubscriptionsList(customerId)
 	}

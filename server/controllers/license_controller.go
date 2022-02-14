@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/emanuelhristea/lime/license"
@@ -22,7 +23,7 @@ func GetLicensesList(c *gin.Context) {
 	preload, exists := c.GetQuery("load")
 	licenseList := &[]models.License{}
 	if exists {
-		licenseList = models.LicensesList(subscriptionId, preload)
+		licenseList = models.LicensesList(subscriptionId, strings.Split(preload, ",")...)
 	} else {
 		licenseList = models.LicensesList(subscriptionId)
 	}
@@ -54,17 +55,22 @@ func UpdateLicense(c *gin.Context) {
 		return
 	}
 
-	_license := &models.License{}
-	_license, err = _license.FindLicenseByID(licenseId)
+	status := false
+	if c.PostForm("status") != "" {
+		status = true
+	}
 
+	_license := &models.License{}
+	_license, err = _license.FindLicenseByID(licenseId, "Subscription", "Subscription.Tariff", "Subscription.Licenses")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	status := false
-	if c.PostForm("status") != "" {
-		status = true
+	nb := numberOfActiveLicenses(&_license.Subscription)
+	if status && nb >= _license.Subscription.Tariff.Users {
+		respondJSON(c, http.StatusNotFound, "Your have reached the maximum number of users for your subscription!")
+		return
 	}
 
 	err = models.SetLicenseStatusByID(licenseId, status)
@@ -145,9 +151,7 @@ func VerifyKey(c *gin.Context) {
 // @Success 200 {string} string "{"status":"200", "msg":""}"
 // @Router /key [post]
 func CreateKey(c *gin.Context) {
-	month := time.Hour * 24 * 31
 	modelSubscription := models.Subscription{}
-
 	request := &requestLicense{}
 	c.BindJSON(&request)
 
@@ -162,7 +166,7 @@ func CreateKey(c *gin.Context) {
 		return
 	}
 
-	encoded, response := addLicenseToSubscription(_subscription, month)
+	encoded, response := addLicenseToSubscription(_subscription)
 	if response != "" {
 		respondJSON(c, http.StatusMethodNotAllowed, response)
 		return
@@ -183,7 +187,7 @@ func numberOfActiveLicenses(_subscription *models.Subscription) int {
 	return num
 }
 
-func addLicenseToSubscription(_subscription *models.Subscription, expiry time.Duration) ([]byte, string) {
+func addLicenseToSubscription(_subscription *models.Subscription) ([]byte, string) {
 	if !_subscription.Customer.Status || !_subscription.Status {
 		return nil, "Your subscription was deactivated!"
 	}
@@ -195,10 +199,12 @@ func addLicenseToSubscription(_subscription *models.Subscription, expiry time.Du
 		Tandem:  _subscription.Tariff.Tandem,
 		Triaxis: _subscription.Tariff.Triaxis,
 		Robots:  _subscription.Tariff.Robots,
+		Period:  _subscription.Tariff.Period,
 		Users:   _subscription.Tariff.Users,
 	}
 
 	metadata := []byte(`{"message": "test message"}`)
+	expiry := time.Duration(limit.Period) * 24 * time.Hour
 	_license := &license.License{
 		Iss: _subscription.Customer.Name,
 		Cus: _subscription.StripeID,
@@ -265,6 +271,7 @@ func GetUserSubscriptions(c *gin.Context) {
 				Tandem:  sub.Tariff.Tandem,
 				Triaxis: sub.Tariff.Triaxis,
 				Robots:  sub.Tariff.Robots,
+				Period:  sub.Tariff.Period,
 				Users:   sub.Tariff.Users,
 			},
 			Used: numberOfActiveLicenses(&sub),

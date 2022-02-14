@@ -40,7 +40,8 @@
 							<th>Tandem</th>
 							<th>Triaxis</th>
 							<th>Robots</th>
-							<th>Users</th>
+							<th>Period (days)</th>
+							<th>Devices</th>
 							<th>Created at</th>
 							<th>Updated at</th>
 							<th>Action</th>
@@ -77,7 +78,7 @@
 								<b style="color: #ee4b2b">&#10006;</b>
 								{{end}}
 							</td>
-
+							<td>{{$value.Period}}</td>
 							<td>{{$value.Users}}</td>
 							<td>{{$value.CreatedAt | formatAsDate}}</td>
 							<td>{{$value.UpdatedAt | formatAsDate}}</td>
@@ -100,7 +101,7 @@
 
 						<tr>
 							<td class="td-noline"></td>
-							<td colspan="9" class="td-new-license">
+							<td colspan="10" class="td-new-license">
 								<a href="/admin/tariffs/new">create new plan</a>
 							</td>
 						</tr>
@@ -114,8 +115,8 @@
 			async
 			defer
 		></script>
-		<script src="/assets/js/main.js" async defer></script>
-		<script src="/assets/js/tariff.js" async defer></script>
+		<script src="/assets/js/main.js"></script>
+		<script src="/assets/js/tariff.js"></script>
 	</body>
 </html>
 {{end}}

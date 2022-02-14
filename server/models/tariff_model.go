@@ -15,6 +15,7 @@ type Tariff struct {
 	Tandem        bool           `gorm:"size:1;not null" json:"crossbar"`
 	Triaxis       bool           `gorm:"size:1;not null" json:"triaxis"`
 	Robots        bool           `gorm:"size:1;not null" json:"robots"`
+	Period        int            `gorm:"size:6;not null" json:"period"`
 	Users         int            `gorm:"size:6;not null" json:"users"`
 	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
@@ -51,6 +52,7 @@ func (t *Tariff) UpdateTariff(uid uint64) (*Tariff, error) {
 			"tandem":     t.Tandem,
 			"triaxis":    t.Triaxis,
 			"robots":     t.Robots,
+			"period":     t.Period,
 			"users":      t.Users,
 			"updated_at": time.Now(),
 		},
