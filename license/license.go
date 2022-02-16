@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/emanuelhristea/lime/server/models"
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -24,30 +25,31 @@ var (
 
 // License is a ...
 type License struct {
-	Iss string          `json:"iss,omitempty"` // Issued By
-	Cus string          `json:"cus,omitempty"` // Customer ID
-	Sub uint64          `json:"sub,omitempty"` // Subscriber ID
-	Typ string          `json:"typ,omitempty"` // License Type
-	Lim Limits          `json:"lim,omitempty"` // License Limit (e.g. Site)
-	Iat time.Time       `json:"iat,omitempty"` // Issued At
-	Exp time.Time       `json:"exp,omitempty"` // Expires At
-	Dat json.RawMessage `json:"dat,omitempty"` // Metadata
+	Iss string          `json:"iss"` // Issued By
+	Cus string          `json:"cus"` // Customer ID
+	Sub uint64          `json:"sub"` // Subscriber ID
+	Typ string          `json:"typ"` // License Type
+	Lim Limits          `json:"lim"` // License Limit (e.g. Site)
+	Iat time.Time       `json:"iat"` // Issued At
+	Exp time.Time       `json:"exp"` // Expires At
+	Dat json.RawMessage `json:"dat"` // Metadata
 }
 
 // Limits is a ...
 type Limits struct {
-	Tandem  bool `json:"tandem,omitempty"`
-	Triaxis bool `json:"triaxis,omitempty"`
-	Robots  bool `json:"robots,omitempty"`
-	Period  int  `json:"expiry,omitempty"`
-	Users   int  `json:"users,omitempty"`
+	Tandem  bool `json:"tandem"`
+	Triaxis bool `json:"triaxis"`
+	Robots  bool `json:"robots"`
+	Period  int  `json:"expiry"`
+	Devices int  `json:"devices"`
 }
 
 type Subscription struct {
-	Plan       string `json:"plan,omitempty"`        // Subscription plan
-	PurchaseID string `json:"purchase_id,omitempty"` // transaction id
-	Limits     Limits `json:"limits,omitempty"`      // License Limit (e.g. Site)
-	Used       int    `json:"used,omitempty"`        //
+	Plan       string      `json:"plan"`        // Subscription plan
+	PurchaseID string      `json:"purchase_id"` // transaction id
+	Limits     Limits      `json:"limits"`      // License Limit (e.g. Site)
+	Used       int         `json:"used"`        //
+	Role       models.Role `json:"role"`        //
 }
 
 // Expired is a ...

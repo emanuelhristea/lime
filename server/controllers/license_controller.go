@@ -200,7 +200,7 @@ func addLicenseToSubscription(_subscription *models.Subscription) ([]byte, strin
 		Triaxis: _subscription.Tariff.Triaxis,
 		Robots:  _subscription.Tariff.Robots,
 		Period:  _subscription.Tariff.Period,
-		Users:   _subscription.Tariff.Users,
+		Devices: _subscription.Tariff.Users,
 	}
 
 	metadata := []byte(`{"message": "test message"}`)
@@ -272,9 +272,10 @@ func GetUserSubscriptions(c *gin.Context) {
 				Triaxis: sub.Tariff.Triaxis,
 				Robots:  sub.Tariff.Robots,
 				Period:  sub.Tariff.Period,
-				Users:   sub.Tariff.Users,
+				Devices: sub.Tariff.Users,
 			},
 			Used: numberOfActiveLicenses(&sub),
+			Role: _customer.Role,
 		})
 	}
 
