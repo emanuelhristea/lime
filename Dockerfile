@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.16-bullseye AS build-stage
+FROM golang:1.17-bullseye AS build-stage
 
 LABEL REPO="https://github.com/emanuelhristea/lime"
 
@@ -12,7 +12,6 @@ ADD . /go/src/github.com/emanuelhristea/lime
 WORKDIR /go/src/github.com/emanuelhristea/lime
 
 RUN make build-alpine
-
 
 
 # Final Stage
@@ -34,12 +33,15 @@ LABEL VERSION=$VERSION
 WORKDIR /opt/bin
 
 COPY --from=build-stage /go/src/github.com/emanuelhristea/lime/bin/lime /opt/bin/
+COPY --from=build-stage /go/src/github.com/emanuelhristea/lime/server/web /opt/bin/server/web
+
 RUN chmod +x /opt/bin/lime
 
 # Create appuser
 RUN adduser -D -g '' lime
 USER lime
 
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+EXPOSE 8080 8080
 
-CMD ["/opt/bin/lime"]
+CMD ["/opt/bin/lime", "server"]
+ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]

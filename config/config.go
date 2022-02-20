@@ -68,7 +68,8 @@ func readViperConfig(appName string) *viper.Viper {
 	v.SetDefault("json_logs", false)
 	v.SetDefault("loglevel", "debug")
 
-	v.SetDefault("mode", "debug") // release
+	v.SetDefault("mode", "release")          // release, debug, test
+	v.SetDefault("web_path", "./server/web") //./web ./server/web
 	v.SetDefault("port", ":8080")
 
 	v.SetDefault("admin_username", "admin")
@@ -77,7 +78,7 @@ func readViperConfig(appName string) *viper.Viper {
 	v.SetDefault("cookie_secret", "TGq7dTjt@G.vkuDYwQfdf7uZvmwr@MzV.r2r6NGtPF")
 	v.SetDefault("cookie_name", "console")
 
-	v.SetDefault("db_host", "127.0.0.1")
+	v.SetDefault("db_host", "host.docker.internal") //"host.docker.internal , 127.0.0.1"
 	v.SetDefault("db_user", "postgres")
 	v.SetDefault("db_password", "postgres")
 	v.SetDefault("db_name", "license")

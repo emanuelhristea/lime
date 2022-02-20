@@ -36,16 +36,18 @@ func Start(args []string) {
 }
 
 func setupRouter() *gin.Engine {
+	cfg := config.Config()
+	webPath := cfg.GetString("web_path")
 	r := gin.Default()
-	r.Use(sessions.Sessions(config.Config().GetString("cookie_name"), sessions.NewCookieStore([]byte(config.Config().GetString("cookie_secret")))))
-	r.Static("/assets", "./server/web/assets")
+	r.Use(sessions.Sessions(cfg.GetString("cookie_name"), sessions.NewCookieStore([]byte(cfg.GetString("cookie_secret")))))
+	r.Static("/assets", webPath+"/assets")
 	r.SetFuncMap(template.FuncMap{
 		"formatAsPrice": formatAsPrice,
 		"formatAsDate":  formatAsDate,
 		"columnStatus":  columnStatus,
 		"bytesToString": keyBytesToString,
 	})
-	r.LoadHTMLGlob("./server/web/templates/*.html")
+	r.LoadHTMLGlob(webPath + "/templates/*.html")
 
 	// Create limiter structs
 	limiterOptions := &limiter.ExpirableOptions{
