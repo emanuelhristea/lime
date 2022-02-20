@@ -30,7 +30,7 @@ $ go run main.go server
 Link for admin console http://localhost:8080/admin/
 default login - admin, password - admin
 <img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/login.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/pricing.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/pricings.png" />
 <img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createpricing.png" />
 <img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/customers.png" />
 <img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createcustomer.png" />
