@@ -1,6 +1,6 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/emanuelhristea/lime)](https://goreportcard.com/report/github.com/emanuelhristea/lime) [![CodeFactor](https://www.codefactor.io/repository/github/emanuelhristea/lime/badge)](https://www.codefactor.io/repository/github/emanuelhristea/lime) ![Docker](https://github.com/emanuelhristea/lime/workflows/Docker/badge.svg) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/emanuelhristea/lime)](https://goreportcard.com/report/github.com/emanuelhristea/lime)
 
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/lime.png" height="70" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/icon.svg" height="70" />
 
 
 ## Installation 
