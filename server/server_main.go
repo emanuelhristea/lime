@@ -61,9 +61,9 @@ func setupRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	api.POST("/key", limiterFast, controllers.CreateKey)
-	api.GET("/key/:customer_id", limiterFast, controllers.GetKey)
+	api.DELETE("/key", limiterFast, controllers.ReleaseKey)
 	api.GET("/subscriptions", limiterMedium, controllers.GetUserSubscriptions)
-	api.PATCH("/key/:customer_id", limiterMedium, controllers.UpdateKey)
+	api.PATCH("/key/:customer_id", limiterMedium, controllers.UpdateLicense)
 	api.POST("/verify", limiterFast, controllers.VerifyKey)
 	api.Use(middleware.AuthRequired)
 	{
@@ -87,6 +87,7 @@ func setupRouter() *gin.Engine {
 
 		api.GET("/licenses/:subscripionId", limiterFast, controllers.GetLicensesList)
 		api.GET("/license/:id", limiterFast, controllers.GetLicense)
+		api.POST("/licenses/:subscripionId", limiterFast, controllers.CreateLicense)
 		api.PATCH("/license/:id", limiterMedium, controllers.UpdateLicense)
 		api.DELETE("/license/:id", limiterSlow, controllers.DeleteLicense)
 	}

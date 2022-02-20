@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +46,41 @@ func GetLicense(c *gin.Context) {
 		return
 	}
 	respondJSON(c, http.StatusOK, _license)
+}
+
+func CreateLicense(c *gin.Context) {
+	sId := c.Param("subscripionId")
+	subscriptionId, err := strconv.ParseUint(sId, 10, 64)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	mac := c.PostForm("mac")
+	modelSubscription := models.Subscription{}
+	_subscription, err := modelSubscription.FindSubscriptionByID(subscriptionId, "Customer", "Tariff", "Licenses")
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	if _subscription.ID == 0 {
+		respondJSON(c, http.StatusNotFound, "Subscripton not found!")
+		return
+	}
+
+	status := false
+	if c.PostForm("status") != "" {
+		status = true
+	}
+
+	encoded, response := addLicenseToSubscription(_subscription, mac, status)
+	if response != "" {
+		respondJSON(c, http.StatusMethodNotAllowed, response)
+		return
+	}
+
+	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
 }
 
 func UpdateLicense(c *gin.Context) {
@@ -162,17 +198,41 @@ func CreateKey(c *gin.Context) {
 	}
 
 	if _subscription.ID == 0 {
-		respondJSON(c, http.StatusNotFound, "Customers not found!")
+		respondJSON(c, http.StatusNotFound, "Subscription not found!")
 		return
 	}
 
-	encoded, response := addLicenseToSubscription(_subscription)
+	encoded, response := addLicenseToSubscription(_subscription, request.Mac, true)
 	if response != "" {
 		respondJSON(c, http.StatusMethodNotAllowed, response)
 		return
 	}
 
 	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
+}
+
+func ReleaseKey(c *gin.Context) {
+	modelLicense := models.License{}
+
+	request := &requestLicense{}
+	c.BindJSON(&request)
+
+	licenseKey, err := base64.StdEncoding.DecodeString(request.License)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+	_license, err := modelLicense.FindLicense(licenseKey)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	nb, err := models.DeleteLicense(_license.ID)
+	if err != nil {
+		respondJSON(c, http.StatusConflict, err.Error())
+	}
+	respondJSON(c, http.StatusOK, nb)
 }
 
 func numberOfActiveLicenses(_subscription *models.Subscription) int {
@@ -187,7 +247,12 @@ func numberOfActiveLicenses(_subscription *models.Subscription) int {
 	return num
 }
 
-func addLicenseToSubscription(_subscription *models.Subscription) ([]byte, string) {
+func addLicenseToSubscription(_subscription *models.Subscription, mac string, status bool) ([]byte, string) {
+	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", mac)
+	if !match || err != nil {
+		return nil, "The MAC address is invalid!"
+	}
+
 	if !_subscription.Customer.Status || !_subscription.Status {
 		return nil, "Your subscription was deactivated!"
 	}
@@ -227,8 +292,9 @@ func addLicenseToSubscription(_subscription *models.Subscription) ([]byte, strin
 	key := &models.License{
 		SubscriptionID: _subscription.ID,
 		License:        encoded,
+		Mac:            mac,
 		Hash:           licenseHash,
-		Status:         true,
+		Status:         status,
 	}
 
 	_, err = key.SaveLicense()
@@ -238,20 +304,16 @@ func addLicenseToSubscription(_subscription *models.Subscription) ([]byte, strin
 	return encoded, ""
 }
 
-// GetKey is a ...
-// @Accept application/json
-// @Produce application/json
-// @Param
-// @Success 200 {string} string "{"status":"200", "msg":""}"
-// @Router /key/:customer_id [get]
-func GetKey(c *gin.Context) {
-	respondJSON(c, http.StatusOK, "GetKey")
-}
-
 // GetUserSubscriptions is a ...
 func GetUserSubscriptions(c *gin.Context) {
 	request := &requestSubscriptions{}
 	c.BindJSON(request)
+
+	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", request.Mac)
+	if !match || err != nil {
+		respondJSON(c, http.StatusNotFound, "The MAC address is invalid!")
+	}
+
 	modelCustomer := models.Customer{}
 	_customer, err := modelCustomer.FindCustomerByEmail(request.Email, "Subscriptions", "Subscriptions.Tariff", "Subscriptions.Licenses")
 	if err != nil {
@@ -263,41 +325,38 @@ func GetUserSubscriptions(c *gin.Context) {
 		if !sub.Status {
 			continue
 		}
+		for _, lic := range sub.Licenses {
+			if lic.Mac == request.Mac {
+				l, err := license.Decode([]byte(lic.License), license.GetPublicKey())
+				if err != nil {
+					respondJSON(c, http.StatusBadRequest, err.Error())
+					return
+				}
 
-		response = append(response, license.Subscription{
-			Plan:       sub.Tariff.Name,
-			PurchaseID: sub.StripeID,
-			Limits: license.Limits{
-				Tandem:  sub.Tariff.Tandem,
-				Triaxis: sub.Tariff.Triaxis,
-				Robots:  sub.Tariff.Robots,
-				Period:  sub.Tariff.Period,
-				Devices: sub.Tariff.Users,
-			},
-			Used: numberOfActiveLicenses(&sub),
-			Role: _customer.Role,
-		})
+				response = append(response, license.Subscription{
+					Plan:       sub.Tariff.Name,
+					PurchaseID: sub.StripeID,
+					Limits: license.Limits{
+						Tandem:  sub.Tariff.Tandem,
+						Triaxis: sub.Tariff.Triaxis,
+						Robots:  sub.Tariff.Robots,
+						Period:  sub.Tariff.Period,
+						Devices: sub.Tariff.Users,
+					},
+					LicenseKey: license.Key{
+						Key:     base64.StdEncoding.EncodeToString(lic.License),
+						Hash:    lic.Hash,
+						Active:  lic.Status,
+						Expired: l.Expired(),
+					},
+					InUse:  numberOfActiveLicenses(&sub),
+					Status: sub.Status,
+					Role:   _customer.Role,
+				})
+				break
+			}
+		}
 	}
 
 	respondJSON(c, http.StatusOK, response)
-}
-
-// UpdateKey is a ...
-// @accept application/json
-// @Produce application/json
-// @Param
-// @Success 200 {string} string "{"status":"200", "msg":""}"
-// @Router /key/:customer_id [PATCH]
-func UpdateKey(c *gin.Context) {
-	respondJSON(c, http.StatusOK, "UpdateKey")
-}
-
-// UpdateKey is a ...
-// @accept application/json
-// @Produce application/json
-// @Param
-// @Success 200 {string} string "{"status":"200", "msg":""}"
-// @Router /key/:customer_id [DELETE]
-func DeleteKey(c *gin.Context) {
-	respondJSON(c, http.StatusOK, "UpdateKey")
 }

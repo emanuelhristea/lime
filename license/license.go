@@ -35,6 +35,14 @@ type License struct {
 	Dat json.RawMessage `json:"dat"` // Metadata
 }
 
+type Key struct {
+	Key     string `json:"key"`
+	Hash    string `json:"hash"`
+	Mac     string `json:"mac"`
+	Active  bool   `json:"valid"`
+	Expired bool   `json:"expired"`
+}
+
 // Limits is a ...
 type Limits struct {
 	Tandem  bool `json:"tandem"`
@@ -48,8 +56,10 @@ type Subscription struct {
 	Plan       string      `json:"plan"`        // Subscription plan
 	PurchaseID string      `json:"purchase_id"` // transaction id
 	Limits     Limits      `json:"limits"`      // License Limit (e.g. Site)
-	Used       int         `json:"used"`        //
+	InUse      int         `json:"in_use"`      //
+	LicenseKey Key         `json:"license_key"` //
 	Role       models.Role `json:"role"`        //
+	Status     bool        `json:"status"`      //
 }
 
 // Expired is a ...

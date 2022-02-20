@@ -41,6 +41,7 @@
 						<tr>
 							<th>Tariff</th>
 							<th>Purchase ID</th>
+							<th>Mac address</th>
 							<th>Created at</th>
 							<th>Updated at</th>
 							<th>Actions</th>
@@ -49,7 +50,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td colspan="6" class="td-new-license">
+							<td colspan="7" class="td-new-license">
 								<a href="/admin/customer/{{.customerID}}/subscription/new"
 									>Add new subscription</a
 								>
@@ -59,6 +60,7 @@
 						<tr>
 							<td><b>{{$value.Tariff.Name}}</b></td>
 							<td>{{$value.StripeID}}</td>
+							<td class="td-noline"></td>
 							<td>{{$value.CreatedAt | formatAsDate}}</td>
 							<td>{{$value.UpdatedAt | formatAsDate}}</td>
 							<td style="text-align: center; vertical-align: middle">
@@ -97,6 +99,7 @@
 								<td class="td-license td-license-hash">
 									<a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a>
 								</td>
+								<td class="td-license">{{$value.Mac}}</td>
 								<td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
 								<td class="td-license">{{$value.UpdatedAt | formatAsDate}}</td>
 								<td
@@ -133,7 +136,7 @@
 						{{if $value.Status}} 
 						<tr>
 							<td class="td-noline"></td>
-							<td colspan="5" class="td-new-license">
+							<td colspan="6" class="td-new-license">
 								<a
 									href="/admin/customer/{{$value.CustomerID}}/sub/{{$value.ID}}/license/new"
 									>create new license</a
@@ -150,6 +153,7 @@
 		<script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js" async defer></script>
 		<script src="/assets/js/main.js"></script>
 		<script src="/assets/js/subscriptions.js"></script>
+		<script src="/assets/js/license.js"></script>
 	</body>
 </html>
 {{end}}

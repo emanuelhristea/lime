@@ -29,26 +29,31 @@ $ go run main.go server
 ## Admin console
 Link for admin console http://localhost:8080/admin/
 default login - admin, password - admin
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/login.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/customers.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/subscriptions.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Login.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Pricing.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreatePricing.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Customers.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateCustomer.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Subscriptions.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateSubscription.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateLicense.png" />
 
 
 ## API list
-* `GET      /api/ping ` : Health server
+* `GET      /ping ` : Health server
 * `POST     /api/key` : Generate new license
-* `GET      /api/key/:customer_id ` : Get active license
+* `GET      /api/subscriptions ` : Get subscriptions and licenses by email and MAC address
 * `PATCH    /api/key/:customer_id` : Update license
 * `POST     /api/verify` : Check status license
-
+* `DELETE   /api/key` : Release license key.
 
 ## TODO
 - [x] Generating license
 - [x] Verification license
-- [ ] Auto-create and install license on the client
+- [X] Create and install license on the client
 - [x] Command-line utility for generating key pair 
 - [ ] Integration with Stripe
 - [x] Example client
 - [x] Admin console
-- [ ] Support IP address check
+- [x] Support MAC address check
 - [ ] Support country check

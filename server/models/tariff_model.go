@@ -79,13 +79,15 @@ func DeleteTariff(uid uint64) (int64, error) {
 
 // TariffsList is a ...
 func TariffsList(relations ...string) *[]Tariff {
-	db := config.DB.Model(&Tariff{}).Order("ID asc")
+	db := config.DB.Model(&Tariff{})
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 
 	tariffs := []Tariff{}
-	db = db.Find(&tariffs)
+	db = db.Find(&tariffs).Order("ID asc")
 	if db.Error != nil {
 		return &tariffs
 	}

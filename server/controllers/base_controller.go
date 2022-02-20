@@ -7,10 +7,12 @@ import (
 type requestLicense struct {
 	StripeID string `json:"customer"`
 	License  string `json:"license"`
+	Mac      string `json:"mac"`
 }
 
 type requestSubscriptions struct {
 	Email string `json:"email"`
+	Mac   string `json:"mac"`
 }
 
 // ResponseData is a ...

@@ -34,7 +34,9 @@ func (s *Subscription) SaveSubscription() (*Subscription, error) {
 func (s *Subscription) FindSubscriptionByID(uid uint64, relations ...string) (*Subscription, error) {
 	db := config.DB.Model(Subscription{}).Where("id = ?", uid)
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 
 	err := db.Take(&s).Error
@@ -51,7 +53,9 @@ func (s *Subscription) FindSubscriptionByID(uid uint64, relations ...string) (*S
 func (s *Subscription) FindSubscriptionByStripeID(stripeID string, relations ...string) (*Subscription, error) {
 	db := config.DB.Model(Subscription{}).Where("stripe_id = ? AND status = ?", stripeID, true)
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 
 	err := db.Take(&s).Error
@@ -120,13 +124,15 @@ func SubscriptionsByCustomerID(customerID string) *[]CustomerSubscriptionsList {
 
 // SubscriptionsList is a ...
 func SubscriptionsList(customerID string, relations ...string) *[]Subscription {
-	db := config.DB.Model(&Subscription{}).Order("ID asc").Where("customer_id=?", customerID)
+	db := config.DB.Model(&Subscription{}).Where("customer_id=?", customerID)
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 
 	subscriptions := []Subscription{}
-	db = db.Find(&subscriptions)
+	db = db.Find(&subscriptions).Order("ID asc")
 	if db.Error != nil {
 		return &subscriptions
 	}

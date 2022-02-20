@@ -95,28 +95,20 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 	sID := c.Param("sid")
 	action := c.Param("action")
 
-	subscriptionID, err := strconv.ParseUint(sID, 10, 64)
-	if err != nil {
-		c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
-		return
-	}
-
 	switch action {
 	case "/":
 	case "/new":
-		modelSubscription := models.Subscription{}
-
-		_subscription, err := modelSubscription.FindSubscriptionByID(subscriptionID, "Tariff", "Customer", "Licenses")
-		if err != nil {
+		name := SubscriptionNameFromID(sID)
+		if name == "" {
+			c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
 			return
 		}
 
-		_, response := addLicenseToSubscription(_subscription)
-		if response != "" {
-			c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/error?message="+response)
-		}
-
-		c.Redirect(http.StatusFound, "/admin/customer/"+cID+"/subscriptions/")
+		c.HTML(http.StatusOK, "new_license.html", gin.H{
+			"title":          "Add license for " + name,
+			"subscriptionID": sID,
+			"customerID":     cID,
+		})
 
 	}
 }
@@ -165,6 +157,21 @@ func CustomerNameFromID(customerID string) string {
 	}
 
 	return _customer.Name
+}
+
+func SubscriptionNameFromID(subscriptionID string) string {
+	subscription := &models.Subscription{}
+	_id, err := strconv.ParseUint(subscriptionID, 10, 64)
+	if err != nil {
+		return ""
+	}
+
+	_subscription, err := subscription.FindSubscriptionByID(_id)
+	if err != nil {
+		return ""
+	}
+
+	return _subscription.StripeID
 }
 
 // DownloadLicense is a ...

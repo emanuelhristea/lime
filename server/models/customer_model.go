@@ -54,7 +54,9 @@ func (c *Customer) SaveCustomer() (*Customer, error) {
 func (c *Customer) FindCustomerByID(uid uint64, relations ...string) (*Customer, error) {
 	db := config.DB.Model(Customer{}).Where("id = ?", uid)
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 
 	err := db.Take(&c).Error
@@ -71,7 +73,9 @@ func (c *Customer) FindCustomerByID(uid uint64, relations ...string) (*Customer,
 func (c *Customer) FindCustomerByEmail(email string, relations ...string) (*Customer, error) {
 	db := config.DB.Model(Customer{}).Where("email = ?", email).Where("status = ?", true)
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 	err := db.Take(&c).Error
 	if err != nil {
@@ -116,12 +120,14 @@ func DeleteCustomer(uid uint64) (int64, error) {
 
 // CustomersList is a ...
 func CustomersList(relations ...string) *[]Customer {
-	db := config.DB.Model(&Customer{}).Order("ID asc")
+	db := config.DB.Model(&Customer{})
 	for _, rel := range relations {
-		db = db.Preload(rel)
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
 	}
 	customers := []Customer{}
-	db = db.Find(&customers)
+	db = db.Find(&customers).Order("ID asc")
 
 	if db.Error != nil {
 		return &customers
