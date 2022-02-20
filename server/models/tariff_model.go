@@ -32,8 +32,14 @@ func (t *Tariff) SaveTariff() (*Tariff, error) {
 }
 
 // FindTariffByID is a ...
-func (t *Tariff) FindTariffByID(uid uint64) (*Tariff, error) {
-	err := config.DB.Model(Tariff{}).Where("id = ?", uid).Take(&t).Error
+func (t *Tariff) FindTariffByID(uid uint64, relations ...string) (*Tariff, error) {
+	db := config.DB.Model(Tariff{}).Where("id = ?", uid)
+	for _, rel := range relations {
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
+	}
+	err := db.Take(&t).Error
 	if err != nil {
 		return &Tariff{}, err
 	}

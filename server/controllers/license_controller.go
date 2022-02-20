@@ -74,13 +74,20 @@ func CreateLicense(c *gin.Context) {
 		status = true
 	}
 
-	encoded, response := addLicenseToSubscription(_subscription, mac, status)
+	key, response := addLicenseToSubscription(_subscription, mac, status)
 	if response != "" {
 		respondJSON(c, http.StatusMethodNotAllowed, response)
 		return
 	}
 
-	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
+	license := license.Key{
+		Key:   base64.StdEncoding.EncodeToString([]byte(key.License)),
+		Hash:  key.Hash,
+		Mac:   key.Mac,
+		Valid: key.Status,
+	}
+
+	respondJSON(c, http.StatusOK, license)
 }
 
 func UpdateLicense(c *gin.Context) {
@@ -152,7 +159,14 @@ func VerifyKey(c *gin.Context) {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
-	_license, err := modelLicense.FindLicense(licenseKey)
+
+	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", request.Mac)
+	if !match || err != nil {
+		respondJSON(c, http.StatusNotFound, "The MAC address is invalid!")
+		return
+	}
+
+	_license, err := modelLicense.FindLicense(licenseKey, request.Mac, "Subscription")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -163,13 +177,20 @@ func VerifyKey(c *gin.Context) {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
+	sub := &_license.Subscription
+	if sub.Expired() {
+		if sub.Status {
+			sub.Status = false
+			sub.UpdateSubscription(sub.ID)
+		}
 
-	if l.Expired() {
 		models.SetLicenseStatusBySubID(_license.ID, false)
+		respondJSON(c, http.StatusNotFound, "License expired")
+		return
 	}
 
 	if !_license.Status {
-		respondJSON(c, http.StatusNotFound, "License expired!")
+		respondJSON(c, http.StatusNotFound, "License inactive")
 		return
 	}
 
@@ -202,13 +223,22 @@ func CreateKey(c *gin.Context) {
 		return
 	}
 
-	encoded, response := addLicenseToSubscription(_subscription, request.Mac, true)
+	key, response := addLicenseToSubscription(_subscription, request.Mac, true)
 	if response != "" {
+		if strings.Contains(response, "licenses_mac_key") {
+			response = "The mac address: " + request.Mac + " is already registered. Please realease it first!"
+		}
 		respondJSON(c, http.StatusMethodNotAllowed, response)
 		return
 	}
+	license := license.Key{
+		Key:   base64.StdEncoding.EncodeToString([]byte(key.License)),
+		Hash:  key.Hash,
+		Mac:   key.Mac,
+		Valid: key.Status,
+	}
 
-	respondJSON(c, http.StatusOK, base64.StdEncoding.EncodeToString([]byte(encoded)))
+	respondJSON(c, http.StatusOK, license)
 }
 
 func ReleaseKey(c *gin.Context) {
@@ -222,7 +252,14 @@ func ReleaseKey(c *gin.Context) {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
-	_license, err := modelLicense.FindLicense(licenseKey)
+
+	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", request.Mac)
+	if !match || err != nil {
+		respondJSON(c, http.StatusNotFound, "The MAC address is invalid!")
+		return
+	}
+
+	_license, err := modelLicense.FindLicense(licenseKey, request.Mac)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -237,9 +274,12 @@ func ReleaseKey(c *gin.Context) {
 
 func numberOfActiveLicenses(_subscription *models.Subscription) int {
 	num := 0
+	if _subscription.Expired() {
+		return num
+	}
+
 	for _, lic := range _subscription.Licenses {
-		l, err := license.Decode([]byte(lic.License), license.GetPublicKey())
-		if err != nil || !lic.Status || l.Expired() {
+		if !lic.Status {
 			continue
 		}
 		num++
@@ -247,17 +287,17 @@ func numberOfActiveLicenses(_subscription *models.Subscription) int {
 	return num
 }
 
-func addLicenseToSubscription(_subscription *models.Subscription, mac string, status bool) ([]byte, string) {
+func addLicenseToSubscription(_subscription *models.Subscription, mac string, status bool) (*models.License, string) {
 	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", mac)
 	if !match || err != nil {
-		return nil, "The MAC address is invalid!"
+		return &models.License{}, "The MAC address is invalid!"
 	}
 
 	if !_subscription.Customer.Status || !_subscription.Status {
-		return nil, "Your subscription was deactivated!"
+		return &models.License{}, "Your subscription was deactivated!"
 	}
 	if numberOfActiveLicenses(_subscription) >= _subscription.Tariff.Users {
-		return nil, "Your have reached the maximum number of users for your subscription!"
+		return &models.License{}, "Your have reached the maximum number of users for your subscription!"
 	}
 
 	limit := license.Limits{
@@ -270,6 +310,13 @@ func addLicenseToSubscription(_subscription *models.Subscription, mac string, st
 
 	metadata := []byte(`{"message": "test message"}`)
 	expiry := time.Duration(limit.Period) * 24 * time.Hour
+
+	//Activate subscription on first license use
+	if len(_subscription.Licenses) == 0 && _subscription.CreatedAt.After(_subscription.IssuedAt) {
+		_subscription.IssuedAt = time.Now().UTC()
+		_subscription.ExpiresAt = time.Now().UTC().Add(expiry)
+		_subscription.UpdateSubscription(_subscription.ID)
+	}
 	_license := &license.License{
 		Iss: _subscription.Customer.Name,
 		Cus: _subscription.StripeID,
@@ -277,13 +324,13 @@ func addLicenseToSubscription(_subscription *models.Subscription, mac string, st
 		Typ: _subscription.Tariff.Name,
 		Lim: limit,
 		Dat: metadata,
-		Exp: time.Now().UTC().Add(expiry),
+		Exp: _subscription.ExpiresAt,
 		Iat: time.Now().UTC(),
 	}
 
 	encoded, err := _license.Encode(license.GetPrivateKey())
 	if err != nil {
-		return nil, err.Error()
+		return &models.License{}, err.Error()
 	}
 
 	hash := md5.Sum([]byte(encoded))
@@ -299,9 +346,9 @@ func addLicenseToSubscription(_subscription *models.Subscription, mac string, st
 
 	_, err = key.SaveLicense()
 	if err != nil {
-		return nil, err.Error()
+		return &models.License{}, err.Error()
 	}
-	return encoded, ""
+	return key, ""
 }
 
 // GetUserSubscriptions is a ...
@@ -312,10 +359,12 @@ func GetUserSubscriptions(c *gin.Context) {
 	match, err := regexp.MatchString("^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$", request.Mac)
 	if !match || err != nil {
 		respondJSON(c, http.StatusNotFound, "The MAC address is invalid!")
+		return
 	}
 
 	modelCustomer := models.Customer{}
 	_customer, err := modelCustomer.FindCustomerByEmail(request.Email, "Subscriptions", "Subscriptions.Tariff", "Subscriptions.Licenses")
+
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -325,37 +374,49 @@ func GetUserSubscriptions(c *gin.Context) {
 		if !sub.Status {
 			continue
 		}
+
+		if sub.Expired() && sub.Status {
+			sub.Status = false
+			sub.UpdateSubscription(sub.ID)
+		}
+
+		active := numberOfActiveLicenses(&sub)
+		expiresIn := int(sub.ExpiresAt.Sub(time.Now().UTC()).Hours() / 24)
+
+		temp := license.Subscription{
+			Plan:       sub.Tariff.Name,
+			PurchaseID: sub.StripeID,
+			Limits: license.Limits{
+				Tandem:  sub.Tariff.Tandem,
+				Triaxis: sub.Tariff.Triaxis,
+				Robots:  sub.Tariff.Robots,
+				Period:  sub.Tariff.Period,
+				Devices: sub.Tariff.Users,
+			},
+
+			InUse:     active,
+			Status:    sub.Status,
+			ExpiresIn: expiresIn,
+			Role:      _customer.Role,
+		}
+
 		for _, lic := range sub.Licenses {
 			if lic.Mac == request.Mac {
-				l, err := license.Decode([]byte(lic.License), license.GetPublicKey())
 				if err != nil {
 					respondJSON(c, http.StatusBadRequest, err.Error())
 					return
 				}
-
-				response = append(response, license.Subscription{
-					Plan:       sub.Tariff.Name,
-					PurchaseID: sub.StripeID,
-					Limits: license.Limits{
-						Tandem:  sub.Tariff.Tandem,
-						Triaxis: sub.Tariff.Triaxis,
-						Robots:  sub.Tariff.Robots,
-						Period:  sub.Tariff.Period,
-						Devices: sub.Tariff.Users,
-					},
-					LicenseKey: license.Key{
-						Key:     base64.StdEncoding.EncodeToString(lic.License),
-						Hash:    lic.Hash,
-						Active:  lic.Status,
-						Expired: l.Expired(),
-					},
-					InUse:  numberOfActiveLicenses(&sub),
-					Status: sub.Status,
-					Role:   _customer.Role,
-				})
+				temp.LicenseKey = license.Key{
+					Key:   base64.StdEncoding.EncodeToString(lic.License),
+					Hash:  lic.Hash,
+					Valid: lic.Status,
+					Mac:   lic.Mac,
+				}
 				break
 			}
 		}
+
+		response = append(response, temp)
 	}
 
 	respondJSON(c, http.StatusOK, response)

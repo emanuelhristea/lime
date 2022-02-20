@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"time"
 
 	"github.com/emanuelhristea/lime/config"
@@ -43,7 +42,6 @@ func (c *Customer) IsGuest() bool {
 // SaveCustomer is a ...
 func (c *Customer) SaveCustomer() (*Customer, error) {
 	err := config.DB.Create(&c).Error
-	log.Print(c)
 	if err != nil {
 		return &Customer{}, err
 	}

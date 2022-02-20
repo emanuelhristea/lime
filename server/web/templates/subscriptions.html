@@ -42,8 +42,8 @@
 							<th>Tariff</th>
 							<th>Purchase ID</th>
 							<th>Mac address</th>
-							<th>Created at</th>
-							<th>Updated at</th>
+							<th>Issued at</th>
+							<th>Expires at</th>
 							<th>Actions</th>
 							<th></th>
 						</tr>
@@ -60,9 +60,9 @@
 						<tr>
 							<td><b>{{$value.Tariff.Name}}</b></td>
 							<td>{{$value.StripeID}}</td>
-							<td class="td-noline"></td>
-							<td>{{$value.CreatedAt | formatAsDate}}</td>
-							<td>{{$value.UpdatedAt | formatAsDate}}</td>
+							<td ></td>
+							<td>{{$value.IssuedAt | formatAsDate}}</td>
+							<td>{{$value.ExpiresAt | formatAsDate}}</td>
 							<td style="text-align: center; vertical-align: middle">
 								{{$prefix:="Enable"}} {{if $value.Status}} {{$prefix ="Disable"}}
 								{{end}}
@@ -101,7 +101,7 @@
 								</td>
 								<td class="td-license">{{$value.Mac}}</td>
 								<td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
-								<td class="td-license">{{$value.UpdatedAt | formatAsDate}}</td>
+								<td class="td-license">{{$value.Subscription.ExpiresAt | formatAsDate}}</td>
 								<td
 									class="td-license"
 									style="text-align: center; vertical-align: middle"

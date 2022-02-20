@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
@@ -126,12 +127,28 @@ func UpdateTariff(c *gin.Context) {
 		return
 	}
 
+	_existing := &models.Tariff{}
+	_existing, err = _existing.FindTariffByID(tariffId, "Subscriptions")
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
 	modelTariff, shouldReturn := getTariffFromForm(c)
 	if shouldReturn {
 		return
 	}
 
 	_tariff, err := modelTariff.UpdateTariff(tariffId)
+
+	//Update expiry of all existing subscriptions if the period is modified
+	if _existing.Period != modelTariff.Period {
+		for _, sub := range _existing.Subscriptions {
+			expiry := time.Duration(_tariff.Period) * 24 * time.Hour
+			sub.ExpiresAt = sub.IssuedAt.Add(expiry)
+			sub.UpdateSubscription(sub.ID)
+		}
+	}
 
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())

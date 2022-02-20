@@ -117,7 +117,7 @@ func CustomerSubscriptionLicenseAction(c *gin.Context) {
 func CustomerSubscriptionList(c *gin.Context) {
 	customerID := c.Param("id")
 	name := CustomerNameFromID(customerID)
-	subscriptionsList := models.SubscriptionsList(customerID, "Licenses", "Customer", "Tariff")
+	subscriptionsList := models.SubscriptionsList(customerID, "Licenses", "Licenses.Subscription", "Customer", "Tariff")
 
 	action := c.Param("action")
 

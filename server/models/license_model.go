@@ -66,8 +66,14 @@ func (l *License) FindLicenseByMac(mac string, relations ...string) (*License, e
 }
 
 // FindLicense is a ...
-func (l *License) FindLicense(key []byte) (*License, error) {
-	err := config.DB.Model(License{}).Where("license = ?", key).Take(&l).Error
+func (l *License) FindLicense(key []byte, mac string, relations ...string) (*License, error) {
+	db := config.DB.Model(License{}).Where("license = ?", key).Where("mac = ?", mac)
+	for _, rel := range relations {
+		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
+			return db.Order("ID asc")
+		})
+	}
+	err := db.Take(&l).Error
 	if err != nil {
 		return &License{}, err
 	}

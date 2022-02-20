@@ -18,7 +18,14 @@ type Subscription struct {
 	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 	Customer   Customer  `json:"customer"`
 	Tariff     Tariff    `json:"tariff"`
+	IssuedAt   time.Time `json:"issued_at"`  // Issued At
+	ExpiresAt  time.Time `json:"expires_at"` // Expires At
 	Licenses   []License `json:"licenses"`
+}
+
+// Expired is a ...
+func (s *Subscription) Expired() bool {
+	return !s.IssuedAt.IsZero() && time.Now().After(s.ExpiresAt)
 }
 
 // SaveSubscription is a ...
@@ -76,6 +83,8 @@ func (s *Subscription) UpdateSubscription(uid uint64) (*Subscription, error) {
 			"stripe_id":   s.StripeID,
 			"tariff_id":   s.TariffID,
 			"status":      s.Status,
+			"issued_at":   s.IssuedAt,
+			"expires_at":  s.ExpiresAt,
 			"updated_at":  time.Now(),
 		},
 	)
