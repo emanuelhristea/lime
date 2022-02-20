@@ -29,14 +29,14 @@ $ go run main.go server
 ## Admin console
 Link for admin console http://localhost:8080/admin/
 default login - admin, password - admin
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Login.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Pricing.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreatePricing.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Customers.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateCustomer.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/Subscriptions.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateSubscription.png" />
-<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/CreateLicense.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/login.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/pricing.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createpricing.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/customers.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createcustomer.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/subscriptions.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createsubscription.png" />
+<img src="https://raw.githubusercontent.com/emanuelhristea/lime/master/.github/assets/admin/createlicense.png" />
 
 
 ## API list
