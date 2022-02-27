@@ -125,7 +125,7 @@ func CustomersList(relations ...string) *[]Customer {
 		})
 	}
 	customers := []Customer{}
-	db = db.Find(&customers).Order("ID asc")
+	db = db.Order("ID asc").Find(&customers)
 
 	if db.Error != nil {
 		return &customers

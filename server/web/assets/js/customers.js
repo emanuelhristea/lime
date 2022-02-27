@@ -69,8 +69,10 @@ $(document).ready(function () {
 			url: `/api/customer/${id}`,
 			type: "PATCH",
 			data: {
-				name: this.dataset.customer,
-				status: this.dataset.status == "true" ? "" : "on",
+				name: this.dataset.customerName,
+				role: this.dataset.customerRole,
+				email: this.dataset.customerEmail,
+				status: this.dataset.customerStatus == "true" ? "" : "on",
 			},
 			success: function () {
 				location.reload()
