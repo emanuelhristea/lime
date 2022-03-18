@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.17-bullseye AS build-stage
+FROM golang:1.18-bullseye AS build-stage
 
 LABEL REPO="https://github.com/emanuelhristea/lime"
 
