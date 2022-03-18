@@ -83,6 +83,7 @@ func setupRouter() *gin.Engine {
 
 		api.GET("/subscriptions/:customerId", limiterFast, controllers.GetSubscriptionList)
 		api.GET("/subscription/:id", limiterFast, controllers.GetSubscription)
+		api.PATCH("/subscription/:sid/renew", limiterMedium, controllers.ReNewSubscription)
 		api.POST("/customer/:id/subscription", limiterMedium, controllers.CreateSubscription)
 		api.PATCH("/customer/:id/subscription/:sid", limiterMedium, controllers.UpdateSubscription)
 		api.DELETE("/customer/:id/subscription/:sid", limiterSlow, controllers.DeleteSubscription)

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -128,7 +129,7 @@ func UpdateTariff(c *gin.Context) {
 	}
 
 	_existing := &models.Tariff{}
-	_existing, err = _existing.FindTariffByID(tariffId, "Subscriptions")
+	_existing, err = _existing.FindTariffByID(tariffId, "Subscriptions", "Subscriptions.Licenses")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -140,19 +141,29 @@ func UpdateTariff(c *gin.Context) {
 	}
 
 	_tariff, err := modelTariff.UpdateTariff(tariffId)
+	if err != nil {
+		respondJSON(c, http.StatusConflict, err.Error())
+		return
+	}
 
 	//Update expiry of all existing subscriptions if the period is modified
 	if _existing.Period != modelTariff.Period {
 		for _, sub := range _existing.Subscriptions {
 			expiry := time.Duration(_tariff.Period) * 24 * time.Hour
 			sub.ExpiresAt = sub.IssuedAt.Add(expiry)
-			sub.UpdateSubscription(sub.ID)
-		}
-	}
+			sub, err := sub.UpdateSubscription(sub.ID)
+			if err != nil {
+				continue
+			}
 
-	if err != nil {
-		respondJSON(c, http.StatusNotFound, err.Error())
-		return
+			for _, lic := range sub.Licenses {
+				_, err := lic.UpdateLicenseExpiry(sub.ExpiresAt)
+				if err != nil {
+					log.Print(err.Error())
+					continue
+				}
+			}
+		}
 	}
 
 	respondJSON(c, http.StatusOK, _tariff)

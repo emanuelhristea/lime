@@ -133,7 +133,7 @@ func SubscriptionsByCustomerID(customerID string) *[]CustomerSubscriptionsList {
 
 // SubscriptionsList is a ...
 func SubscriptionsList(customerID string, relations ...string) *[]Subscription {
-	db := config.DB.Model(&Subscription{}).Where("customer_id=?", customerID)
+	db := config.DB.Model(&Subscription{}).Where("customer_id=?", customerID).Order("ID asc")
 	for _, rel := range relations {
 		db = db.Preload(rel, func(db *gorm.DB) *gorm.DB {
 			return db.Order("ID asc")
@@ -141,7 +141,7 @@ func SubscriptionsList(customerID string, relations ...string) *[]Subscription {
 	}
 
 	subscriptions := []Subscription{}
-	db = db.Find(&subscriptions).Order("ID asc")
+	db = db.Find(&subscriptions)
 	if db.Error != nil {
 		return &subscriptions
 	}

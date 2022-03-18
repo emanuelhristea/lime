@@ -1,9 +1,12 @@
 package models
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"time"
 
 	"github.com/emanuelhristea/lime/config"
+	"github.com/emanuelhristea/lime/license"
 	"github.com/jinzhu/gorm"
 )
 
@@ -91,6 +94,7 @@ func (l *License) UpdateLicense(uid uint64) (*License, error) {
 			"mac":             l.Mac,
 			"license":         l.License,
 			"status":          l.Status,
+			"hash":            l.Hash,
 			"updated_at":      time.Now(),
 		},
 	)
@@ -103,6 +107,36 @@ func (l *License) UpdateLicense(uid uint64) (*License, error) {
 		return &License{}, err
 	}
 	return l, nil
+}
+
+func (l *License) UpdateLicenseExpiry(expiry time.Time) (*License, error) {
+	existing, err := license.Decode([]byte(l.License), license.GetPublicKey())
+	if err != nil {
+		return l, err
+	}
+
+	_license := &license.License{
+		Iss: existing.Iss,
+		Cus: existing.Cus,
+		Sub: existing.Sub,
+		Typ: existing.Typ,
+		Lim: existing.Lim,
+		Dat: existing.Dat,
+		Exp: expiry,
+		Iat: existing.Iat,
+	}
+
+	encoded, err := _license.Encode(license.GetPrivateKey())
+	if err != nil {
+		return l, err
+	}
+
+	l.License = encoded
+
+	hash := md5.Sum([]byte(encoded))
+	licenseHash := hex.EncodeToString(hash[:])
+	l.Hash = licenseHash
+	return l.UpdateLicense(l.ID)
 }
 
 // DeleteLicense is a ...

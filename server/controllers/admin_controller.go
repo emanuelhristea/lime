@@ -241,7 +241,7 @@ func TariffAction(c *gin.Context) {
 		}
 
 		c.HTML(http.StatusOK, "new_tariff.html", gin.H{
-			"title":  "Update customer",
+			"title":  "Update pricing plan",
 			"Tariff": tariff,
 		})
 	}

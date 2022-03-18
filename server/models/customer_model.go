@@ -4,15 +4,8 @@ import (
 	"time"
 
 	"github.com/emanuelhristea/lime/config"
+	"github.com/emanuelhristea/lime/license"
 	"github.com/jinzhu/gorm"
-)
-
-type Role string
-
-const (
-	adminRole Role = "admin"
-	userRole  Role = "user"
-	guestRole Role = "guest"
 )
 
 // Customer is a ...
@@ -20,7 +13,7 @@ type Customer struct {
 	ID            uint64         `gorm:"primary_key;auto_increment" json:"id"`
 	Name          string         `gorm:"size:255;not null;unique" json:"name"`
 	Email         string         `gorm:"size:255;not null;unique" json:"email"`
-	Role          Role           `json:"role" sql:"type:role"`
+	Role          license.Role   `json:"role" sql:"type:role"`
 	Status        bool           `gorm:"false" json:"status"`
 	CreatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
@@ -28,15 +21,15 @@ type Customer struct {
 }
 
 func (c *Customer) IsAdmin() bool {
-	return c.Role == adminRole
+	return c.Role == license.AdminRole
 }
 
 func (c *Customer) IsUser() bool {
-	return c.Role == userRole
+	return c.Role == license.UserRole
 }
 
 func (c *Customer) IsGuest() bool {
-	return c.Role == guestRole
+	return c.Role == license.GuestRole
 }
 
 // SaveCustomer is a ...

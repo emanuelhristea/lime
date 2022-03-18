@@ -7,7 +7,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/emanuelhristea/lime/server/models"
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -21,6 +20,15 @@ var (
 	// generate new ed25519 key and replaces !!!
 	privateKey = []byte("M7JsfVjXCj/60wflqhWisMh0tzHC7ozEB55EjsOT8ZXEgIn1/wXJhpPV47NDLrsuIc6gdcQcesQmyk2OBMmsqw==")
 	publicKey  = []byte("xICJ9f8FyYaT1eOzQy67LiHOoHXEHHrEJspNjgTJrKs=")
+)
+
+// Role is
+type Role string
+
+const (
+	AdminRole Role = "admin"
+	UserRole  Role = "user"
+	GuestRole Role = "guest"
 )
 
 // License is a ...
@@ -52,14 +60,14 @@ type Limits struct {
 }
 
 type Subscription struct {
-	Plan       string      `json:"plan"`                  // Subscription plan
-	PurchaseID string      `json:"purchase_id"`           // transaction id
-	Limits     Limits      `json:"limits"`                // License Limit (e.g. Site)
-	InUse      int         `json:"in_use"`                //
-	LicenseKey Key         `json:"license_key,omitempty"` //
-	Role       models.Role `json:"role"`                  //
-	Status     bool        `json:"status"`                //
-	ExpiresIn  int         `json:"expires_in"`
+	Plan       string `json:"plan"`                  // Subscription plan
+	PurchaseID string `json:"purchase_id"`           // transaction id
+	Limits     Limits `json:"limits"`                // License Limit (e.g. Site)
+	InUse      int    `json:"in_use"`                //
+	LicenseKey Key    `json:"license_key,omitempty"` //
+	Role       Role   `json:"role"`                  //
+	Status     bool   `json:"status"`                //
+	ExpiresIn  int    `json:"expires_in"`
 }
 
 // Expired is a ...

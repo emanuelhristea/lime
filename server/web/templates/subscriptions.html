@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Manage client subscriptions to SiMPLE">
+		<meta name="description" content="Manage client subscriptions to SiMPLE" />
 		<title>{{ .title }}</title>
 		<link
 			rel="stylesheet"
@@ -60,7 +60,7 @@
 						<tr>
 							<td><b>{{$value.Tariff.Name}}</b></td>
 							<td>{{$value.StripeID}}</td>
-							<td ></td>
+							<td></td>
 							<td>{{$value.IssuedAt | formatAsDate}}</td>
 							<td>{{$value.ExpiresAt | formatAsDate}}</td>
 							<td style="text-align: center; vertical-align: middle">
@@ -83,6 +83,13 @@
 								>
 								<span>&nbsp;</span>
 								<a
+									id="renew_subscription_{{$value.ID}}"
+									href="#"
+									title="Renew {{$value.StripeID}}"
+									><b>&#x21bb;</b></a
+								>
+								<span>&nbsp;</span>
+								<a
 									id="delete_subscription_{{$value.ID}}"
 									data-customer-id="{{$value.CustomerID}}"
 									href="#"
@@ -92,48 +99,47 @@
 							</td>
 							<td>{{ $value.Status | columnStatus}}</td>
 						</tr>
-						{{if $value.Licenses}} 
-							{{ range $key, $value := $value.Licenses }}
-							<tr>
-								<td class="td-noline"></td>
-								<td class="td-license td-license-hash">
-									<a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a>
-								</td>
-								<td class="td-license">{{$value.Mac}}</td>
-								<td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
-								<td class="td-license">{{$value.Subscription.ExpiresAt | formatAsDate}}</td>
-								<td
-									class="td-license"
-									style="text-align: center; vertical-align: middle"
+						{{if $value.Licenses}} {{ range $key, $value := $value.Licenses }}
+						<tr>
+							<td class="td-noline"></td>
+							<td class="td-license td-license-hash">
+								<a href="/admin/license/{{$value.ID}}">🎟 {{$value.Hash}}</a>
+							</td>
+							<td class="td-license">{{$value.Mac}}</td>
+							<td class="td-license">{{$value.CreatedAt | formatAsDate}}</td>
+							<td class="td-license">
+								{{$value.Subscription.ExpiresAt | formatAsDate}}
+							</td>
+							<td
+								class="td-license"
+								style="text-align: center; vertical-align: middle"
+							>
+								{{$prefix:="Enable"}} {{if $value.Status}} {{$prefix ="Disable"}}
+								{{end}}
+								<a
+									id="toggle_license_{{$value.ID}}"
+									data-status="{{$value.Status}}"
+									href="#"
+									title="{{$prefix}} license {{$value.Hash}}"
 								>
-									{{$prefix:="Enable"}} {{if $value.Status}} {{$prefix ="Disable"}}
-									{{end}}
-									<a
-										id="toggle_license_{{$value.ID}}"
-										data-status="{{$value.Status}}"
-										href="#"
-										title="{{$prefix}} license {{$value.Hash}}"
-									>
-										{{if $value.Status}}
-										<b>&#10006;</b>
-										{{else}}
-										<b>&#10004;</b>
-										{{end}}</a
-									>
-									<span>&nbsp;</span>
+									{{if $value.Status}}
+									<b>&#10006;</b>
+									{{else}}
+									<b>&#10004;</b>
+									{{end}}</a
+								>
+								<span>&nbsp;</span>
 
-									<a
-										id="delete_license_{{$value.ID}}"
-										href="#"
-										title="Delete {{$value.Hash}}"
-										><b>&#x1F5D1;</b></a
-									>
-								</td>
-								<td class="td-license">{{$value.Status | columnStatus}}</td>
-							</tr>
-							{{end}} 
-						{{end}} 
-						{{if $value.Status}} 
+								<a
+									id="delete_license_{{$value.ID}}"
+									href="#"
+									title="Delete {{$value.Hash}}"
+									><b>&#x1F5D1;</b></a
+								>
+							</td>
+							<td class="td-license">{{$value.Status | columnStatus}}</td>
+						</tr>
+						{{end}} {{end}} {{if $value.Status}}
 						<tr>
 							<td class="td-noline"></td>
 							<td colspan="6" class="td-new-license">
@@ -142,15 +148,18 @@
 									>create new license</a
 								>
 							</td>
-						</tr>	
-						{{end}}					
-						{{end}}
+						</tr>
+						{{end}} {{end}}
 					</tbody>
 				</table>
 			</section>
 		</main>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js" async defer></script>
+		<script
+			src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js"
+			async
+			defer
+		></script>
 		<script src="/assets/js/main.js"></script>
 		<script src="/assets/js/subscriptions.js"></script>
 		<script src="/assets/js/license.js"></script>

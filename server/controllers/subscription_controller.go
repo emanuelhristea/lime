@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
@@ -96,15 +98,61 @@ func UpdateSubscription(c *gin.Context) {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
+
 	modelSubscription, shouldReturn := extractSubscriptionFromForm(c)
 	if shouldReturn {
 		return
 	}
+	_found := &models.Subscription{}
+	_found, err = _found.FindSubscriptionByID(subscriptionId)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	modelSubscription.IssuedAt = _found.IssuedAt
+	modelSubscription.ExpiresAt = _found.ExpiresAt
 
 	_subscription, err := modelSubscription.UpdateSubscription(subscriptionId)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
+	}
+
+	respondJSON(c, http.StatusOK, _subscription)
+}
+
+func ReNewSubscription(c *gin.Context) {
+	sId := c.Param("sid")
+	subscriptionId, err := strconv.ParseUint(sId, 10, 64)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	_found := &models.Subscription{}
+	_found, err = _found.FindSubscriptionByID(subscriptionId, "Tariff", "Licenses")
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	expiry := time.Duration(_found.Tariff.Period) * 24 * time.Hour
+	_found.IssuedAt = time.Now().UTC()
+	_found.ExpiresAt = time.Now().UTC().Add(expiry)
+
+	_subscription, err := _found.UpdateSubscription(subscriptionId)
+	if err != nil {
+		respondJSON(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	for _, lic := range _subscription.Licenses {
+		_, err := lic.UpdateLicenseExpiry(_subscription.ExpiresAt)
+		if err != nil {
+			log.Print(err.Error())
+			continue
+		}
 	}
 
 	respondJSON(c, http.StatusOK, _subscription)

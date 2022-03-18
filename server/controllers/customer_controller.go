@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/emanuelhristea/lime/license"
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/gin"
 )
@@ -67,7 +68,7 @@ func getCustomerFromForm(c *gin.Context) (*models.Customer, bool) {
 	modelCustomer := &models.Customer{
 		Name:   n,
 		Email:  e,
-		Role:   models.Role(r),
+		Role:   license.Role(r),
 		Status: status,
 	}
 	return modelCustomer, false
