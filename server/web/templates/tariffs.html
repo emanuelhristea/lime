@@ -80,8 +80,8 @@
 							</td>
 							<td>{{$value.Period}}</td>
 							<td>{{$value.Users}}</td>
-							<td>{{$value.CreatedAt | formatAsDate}}</td>
-							<td>{{$value.UpdatedAt | formatAsDate}}</td>
+							<td>{{$value.CreatedAt | formatAsDateTime}}</td>
+							<td>{{$value.UpdatedAt | formatAsDateTime}}</td>
 							<td style="text-align: center; vertical-align: middle">
 								<a
 									href="/admin/tariff/{{$value.ID}}/edit/update"

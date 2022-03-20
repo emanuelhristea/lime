@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func formatAsDate(t time.Time) string {
+func formatAsDateTime(t time.Time) string {
 	return fmt.Sprintf("%d.%02d.%02d %02d:%02d:%02d",
 		t.Year(),
 		t.Month(),
@@ -16,6 +16,14 @@ func formatAsDate(t time.Time) string {
 		t.Second())
 }
 
+func formatAsDateTimeLocal(t time.Time) string {
+	return fmt.Sprintf("%d-%02d-%02dT%02d:%02d",
+		t.Year(),
+		t.Month(),
+		t.Day(),
+		t.Hour(),
+		t.Minute())
+}
 func formatAsPrice(price int) string {
 	realPrice := float64(price) / 100
 	return fmt.Sprintf("%.2f", realPrice)

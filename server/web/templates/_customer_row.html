@@ -8,8 +8,8 @@
 	</td>
 	<td>{{.Email}}</td>
 	<td>{{.Role}}</td>
-	<td>{{.CreatedAt | formatAsDate}}</td>
-	<td>{{.UpdatedAt | formatAsDate}}</td>
+	<td>{{.CreatedAt | formatAsDateTime}}</td>
+	<td>{{.UpdatedAt | formatAsDateTime}}</td>
 	<td style="text-align: center; vertical-align: middle">
 		{{$prefix:="Enable"}} {{if .Status}} {{$prefix ="Disable"}} {{end}}
 

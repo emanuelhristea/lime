@@ -104,14 +104,22 @@ func UpdateSubscription(c *gin.Context) {
 		return
 	}
 	_found := &models.Subscription{}
-	_found, err = _found.FindSubscriptionByID(subscriptionId)
+	_found, err = _found.FindSubscriptionByID(subscriptionId, "Tariff")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
-	modelSubscription.IssuedAt = _found.IssuedAt
-	modelSubscription.ExpiresAt = _found.ExpiresAt
+	iAt := c.PostForm("issued_at")
+	issuedAt, err := time.Parse("2006-01-02T15:04", iAt)
+	if iAt == "" || err != nil {
+		modelSubscription.IssuedAt = _found.IssuedAt
+		modelSubscription.ExpiresAt = _found.ExpiresAt
+	} else {
+		modelSubscription.IssuedAt = issuedAt
+		expiry := time.Duration(_found.Tariff.Period) * 24 * time.Hour
+		modelSubscription.ExpiresAt = issuedAt.Add(expiry)
+	}
 
 	_subscription, err := modelSubscription.UpdateSubscription(subscriptionId)
 	if err != nil {

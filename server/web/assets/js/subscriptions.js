@@ -1,12 +1,32 @@
 $(document).ready(function () {
 	$("input[id^='create_subscription']").click(function () {
-		var id = this.id.replace("create_subscription_", "");
+		var customerId = this.id.replace("create_subscription_", "");
 		$.ajax({
-			url: `/api/customer/${id}/subscription`,
+			url: `/api/customer/${customerId}/subscription`,
 			type: "POST",
 			data: $("#subscription_form").serialize(),
 			success: function () {
-				location.replace(`/admin/customer/${id}/subscriptions/`);
+				location.replace(`/admin/customer/${customerId}/subscriptions/`);
+			},
+			error: function (xhr, status, error) {
+				var err = eval("(" + xhr.responseText + ")");
+				var message =
+					typeof err.msg !== "undefined" && err.msg != null && err.msg != "" ? err.msg : "Incorrect Data";
+				$("#subscription_result").html("<p><b>" + message + "</b></p>");
+			},
+		});
+		return false;
+	});
+
+	$("input[id^='update_subscription']").click(function () {
+		var id = this.id.replace("update_subscription_", "");
+		var customerId = this.dataset.customerId;
+		$.ajax({
+			url: `/api/customer/${customerId}/subscription/${id}`,
+			type: "PATCH",
+			data: $("#subscription_form").serialize(),
+			success: function () {
+				location.replace(`/admin/customer/${customerId}/subscriptions/`);
 			},
 			error: function (xhr, status, error) {
 				var err = eval("(" + xhr.responseText + ")");

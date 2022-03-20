@@ -42,14 +42,15 @@ func setupRouter() *gin.Engine {
 	r.Use(sessions.Sessions(cfg.GetString("cookie_name"), sessions.NewCookieStore([]byte(cfg.GetString("cookie_secret")))))
 	r.Static("/assets", webPath+"/assets")
 	r.SetFuncMap(template.FuncMap{
-		"formatAsPrice": formatAsPrice,
-		"formatAsDate":  formatAsDate,
-		"columnStatus":  columnStatus,
-		"bytesToString": keyBytesToString,
+		"formatAsPrice":         formatAsPrice,
+		"formatAsDateTime":      formatAsDateTime,
+		"formatAsDateTimeLocal": formatAsDateTimeLocal,
+		"columnStatus":          columnStatus,
+		"bytesToString":         keyBytesToString,
 	})
 	r.LoadHTMLGlob(webPath + "/templates/*.html")
 
-	// Create limiter structs
+	// Create limiter struct
 	limiterOptions := &limiter.ExpirableOptions{
 		DefaultExpirationTTL: time.Hour,
 		ExpireJobInterval:    time.Hour * 2,
@@ -64,8 +65,8 @@ func setupRouter() *gin.Engine {
 	api := r.Group("/api")
 	api.POST("/key", limiterFast, controllers.CreateKey)
 	api.DELETE("/key", limiterFast, controllers.ReleaseKey)
-	api.GET("/subscriptions", limiterMedium, controllers.GetUserSubscriptions)
-	api.PATCH("/key/:customer_id", limiterMedium, controllers.UpdateLicense)
+	api.GET("/subscriptions", limiterFast, controllers.GetUserSubscriptions)
+	api.PATCH("/key/:customer_id", limiterFast, controllers.UpdateLicense)
 	api.POST("/verify", limiterFast, controllers.VerifyKey)
 	api.Use(middleware.AuthRequired)
 	{
@@ -106,6 +107,8 @@ func setupRouter() *gin.Engine {
 		admin.GET("/customer/:id", controllers.CustomerRowHandler)
 		admin.GET("/customer/:id/subscription/*action", controllers.CustomerSubscriptionAction)
 		admin.GET("/customer/:id/subscriptions/*action", controllers.CustomerSubscriptionList)
+
+		admin.GET("/customer/:id/sub/:sid/subscription/*action", controllers.CustomerSubscriptionAction)
 		admin.GET("/customer/:id/sub/:sid/license/*action", controllers.CustomerSubscriptionLicenseAction)
 
 		admin.GET("/tariffs/*action", controllers.TariffsList)

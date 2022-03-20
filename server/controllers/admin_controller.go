@@ -63,6 +63,20 @@ func customerFromParam(c *gin.Context) (*models.Customer, error) {
 	return customer, err
 }
 
+func subscriptionFromParam(c *gin.Context) (*models.Subscription, error) {
+	sID := c.Param("sid")
+	subscriptionID, err := strconv.ParseUint(sID, 10, 64)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/admin/")
+	}
+	subscription := &models.Subscription{}
+	subscription, err = subscription.FindSubscriptionByID(subscriptionID)
+	if err != nil {
+		c.Redirect(http.StatusNotFound, "/admin/")
+	}
+	return subscription, err
+}
+
 func CustomerRowHandler(c *gin.Context) {
 	customer, err := customerFromParam(c)
 	if err == nil {
@@ -84,6 +98,19 @@ func CustomerSubscriptionAction(c *gin.Context) {
 			"customerID": customerID,
 			"Tariffs":    tariffsList,
 		})
+	case "/update":
+		name := CustomerNameFromID(customerID)
+		tariffsList := models.TariffsList()
+		subscription, err := subscriptionFromParam(c)
+		if err == nil {
+			c.HTML(http.StatusOK, "new_subscription.html", gin.H{
+				"title":        "Subscription and Licenses for " + name,
+				"Subscription": subscription,
+				"customerID":   customerID,
+				"Tariffs":      tariffsList,
+			})
+		}
+
 	default:
 		c.Redirect(http.StatusFound, "/admin/customer/"+customerID+"/subscriptions/")
 	}
