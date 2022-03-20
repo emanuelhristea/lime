@@ -82,6 +82,26 @@ func CreateSubscription(c *gin.Context) {
 		return
 	}
 
+	_found := &models.Tariff{}
+	_found, err := _found.FindTariffByID(modelSubscription.TariffID)
+	if err != nil {
+		respondJSON(c, http.StatusForbidden, err.Error())
+		return
+	}
+
+	expiry := time.Duration(_found.Period) * 24 * time.Hour
+
+	iAt := c.PostForm("issued_at")
+	issuedAt, err := time.Parse("2006-01-02T15:04", iAt)
+	if iAt == "" || err != nil {
+
+		modelSubscription.IssuedAt = time.Now().UTC()
+		modelSubscription.ExpiresAt = time.Now().UTC().Add(expiry)
+	} else {
+		modelSubscription.IssuedAt = issuedAt
+		modelSubscription.ExpiresAt = issuedAt.Add(expiry)
+	}
+
 	_subscription, err := modelSubscription.SaveSubscription()
 	if err != nil {
 		respondJSON(c, http.StatusBadRequest, "Cannot save subscription. Duplicate payment id or plan")
@@ -130,7 +150,7 @@ func UpdateSubscription(c *gin.Context) {
 	}
 
 	if shouldUpdateLicenses {
-		for _, lic := range _subscription.Licenses {
+		for _, lic := range _found.Licenses {
 			_, err := lic.UpdateLicenseExpiry(_subscription.ExpiresAt)
 			if err != nil {
 				log.Print(err.Error())
@@ -167,7 +187,7 @@ func ReNewSubscription(c *gin.Context) {
 		return
 	}
 
-	for _, lic := range _subscription.Licenses {
+	for _, lic := range _found.Licenses {
 		_, err := lic.UpdateLicenseExpiry(_subscription.ExpiresAt)
 		if err != nil {
 			log.Print(err.Error())
