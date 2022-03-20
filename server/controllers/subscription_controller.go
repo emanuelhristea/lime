@@ -104,7 +104,7 @@ func UpdateSubscription(c *gin.Context) {
 		return
 	}
 	_found := &models.Subscription{}
-	_found, err = _found.FindSubscriptionByID(subscriptionId, "Tariff")
+	_found, err = _found.FindSubscriptionByID(subscriptionId, "Tariff", "Licenses")
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
@@ -112,6 +112,7 @@ func UpdateSubscription(c *gin.Context) {
 
 	iAt := c.PostForm("issued_at")
 	issuedAt, err := time.Parse("2006-01-02T15:04", iAt)
+	shouldUpdateLicenses := false
 	if iAt == "" || err != nil {
 		modelSubscription.IssuedAt = _found.IssuedAt
 		modelSubscription.ExpiresAt = _found.ExpiresAt
@@ -119,12 +120,23 @@ func UpdateSubscription(c *gin.Context) {
 		modelSubscription.IssuedAt = issuedAt
 		expiry := time.Duration(_found.Tariff.Period) * 24 * time.Hour
 		modelSubscription.ExpiresAt = issuedAt.Add(expiry)
+		shouldUpdateLicenses = true
 	}
 
 	_subscription, err := modelSubscription.UpdateSubscription(subscriptionId)
 	if err != nil {
 		respondJSON(c, http.StatusNotFound, err.Error())
 		return
+	}
+
+	if shouldUpdateLicenses {
+		for _, lic := range _subscription.Licenses {
+			_, err := lic.UpdateLicenseExpiry(_subscription.ExpiresAt)
+			if err != nil {
+				log.Print(err.Error())
+				continue
+			}
+		}
 	}
 
 	respondJSON(c, http.StatusOK, _subscription)
