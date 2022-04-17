@@ -13,8 +13,8 @@ import (
 // License is a ...
 type License struct {
 	ID             uint64       `gorm:"primary_key;auto_increment" json:"id"`
-	SubscriptionID uint64       `sql:"type:int REFERENCES subscriptions(id) ON DELETE CASCADE" json:"subscription_id"`
-	Mac            string       `gorm:"size:255;not null;unique" json:"mac"`
+	SubscriptionID uint64       `sql:"unique_index:idx_sub_mac;type:int REFERENCES subscriptions(id) ON DELETE CASCADE" json:"subscription_id"`
+	Mac            string       `gorm:"unique_index:idx_sub_mac;size:255;not null;unique" json:"mac"`
 	License        []byte       `gorm:"null" json:"license"`
 	Hash           string       `gorm:"null" json:"hash"`
 	Status         bool         `gorm:"false" json:"status"`

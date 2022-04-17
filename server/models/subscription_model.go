@@ -11,8 +11,8 @@ import (
 type Subscription struct {
 	ID         uint64    `gorm:"primary_key;auto_increment" json:"id"`
 	StripeID   string    `gorm:"size:18;not null;unique" json:"stripe_id"`
-	CustomerID uint64    `sql:"unique_index:idx_member;type:int REFERENCES customers(id) ON DELETE CASCADE" json:"customer_id"`
-	TariffID   uint64    `sql:"unique_index:idx_member;type:int REFERENCES tariffs(id) ON DELETE CASCADE" json:"tariff_id"`
+	CustomerID uint64    `sql:"unique_index:idx_customer_tariff;type:int REFERENCES customers(id) ON DELETE CASCADE" json:"customer_id"`
+	TariffID   uint64    `sql:"unique_index:idx_customer_tariff;type:int REFERENCES tariffs(id) ON DELETE CASCADE" json:"tariff_id"`
 	Status     bool      `gorm:"false" json:"status"`
 	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
