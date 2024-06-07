@@ -36,17 +36,21 @@
 					<input type="text" placeholder="Name" name="name" value="{{.Customer.Name}}" />
 					<input type="text" placeholder="Email" name="email" value="{{.Customer.Email}}" />
 					<select placeholder="Role" name="role" value="{{.Customer.Role}}">
-						<option value="admin">Admin</option>
-						<option value="user">User</option>
-						<option value="guest">Guest</option>
+						{{range $key, $value := .Roles}}
+						<option value="{{ $value.Role }}" {{ if eq $value.Role .Customer.Role }} selected="selected" {{ end }}>
+							{{ $value.Caption }}
+						</option>
+						{{end}}
 					</select>
 					{{else}}
 					<input type="text" placeholder="Name" name="name" />
 					<input type="text" placeholder="Email" name="email"/>
 					<select placeholder="Role" name="role">
-						<option value="admin">Admin</option>
-						<option value="user">User</option>
-						<option value="guest">Guest</option>
+						{{range $key, $value := .Roles}}
+						<option value="{{ $value.Role }}">
+							{{ $value.Caption }}
+						</option>
+						{{end}}
 					</select>
 					{{end}}
 					<label>

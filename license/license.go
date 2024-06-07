@@ -7,6 +7,9 @@ import (
 	"errors"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -30,6 +33,24 @@ const (
 	UserRole  Role = "user"
 	GuestRole Role = "guest"
 )
+
+type DisplayRole struct {
+	Role    Role   `json:"role"`
+	Caption string `json:"caption"`
+}
+
+// Update this function when modifying the Role type
+func GetRoleValues() []DisplayRole {
+	roles := []Role{AdminRole, UserRole, GuestRole}
+	displayRoles := make([]DisplayRole, len(roles))
+	for i, role := range roles {
+		displayRoles[i] = DisplayRole{
+			Role:    role,
+			Caption: cases.Title(language.English, cases.NoLower).String(string(role)),
+		}
+	}
+	return displayRoles
+}
 
 // License is a ...
 type License struct {

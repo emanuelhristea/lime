@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/emanuelhristea/lime/license"
 	"github.com/emanuelhristea/lime/server/middleware"
 	"github.com/emanuelhristea/lime/server/models"
 	"github.com/gin-gonic/contrib/sessions"
@@ -28,6 +29,7 @@ func MainHandler(c *gin.Context) {
 		case "/new":
 			c.HTML(http.StatusOK, "new_customer.html", gin.H{
 				"title": "Create new customer",
+				"Roles": license.GetRoleValues(),
 			})
 
 		case "/update":
@@ -36,6 +38,7 @@ func MainHandler(c *gin.Context) {
 				c.HTML(http.StatusOK, "new_customer.html", gin.H{
 					"title":    "Update customer",
 					"Customer": customer,
+					"Roles":    license.GetRoleValues(),
 				})
 			}
 		default:
